@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+.open-sans {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 700;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
