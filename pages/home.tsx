@@ -58,11 +58,11 @@ const Home: React.FC = () => {
                     </div>
                 </div>
 
-                <div className='pt-24 pb-6'>
-                    <p className='text-primary-100 open-sans text-2xl'>Most read this week</p>
+                <div className='pt-24 pb-8'>
+                    <p className='text-primary-100 open-sans text-3xl'>Most read this week</p>
                 </div>
                 <div className='flex gap-10'>
-                    <div className='flex gap-12 bg-primary-400 p-10 w-fit '>
+                    <div className='flex gap-12 bg-primary-400 p-14 w-fit '>
                         <div className='w-56 h-72 bg-primary-100 shadow-primary-300 shadow-3xl'></div>
                         <div className='flex flex-col justify-between py-3'>
                             <div>
@@ -78,7 +78,7 @@ const Home: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className='flex gap-12 bg-primary-400 p-10 w-fit '>
+                    <div className='flex gap-12 bg-primary-400 p-14 w-fit '>
                         <div className='w-56 h-72 bg-primary-100 shadow-primary-300 shadow-3xl'></div>
                         <div className='flex flex-col justify-between py-3'>
                             <div>
@@ -95,7 +95,7 @@ const Home: React.FC = () => {
                     </div>
                 </div>
                 <div className='py-12'>
-                    <p className='text-primary-100 open-sans text-2xl'>Readers choice 2024</p>
+                    <p className='text-primary-100 open-sans text-3xl'>Readers choice 2024</p>
                 </div>
             </div>
             
