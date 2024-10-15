@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 
 const NavBar = () => {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const router = useRouter();
-
-    const toggleDropdown = () => {
-        setDropdownOpen((prev) => !prev);
-    };
 
   return (
     <nav className="flex justify-between items-center py-4 px-10 bg-primary-100 text-white">
@@ -29,7 +22,10 @@ const NavBar = () => {
                 <p>Book lists</p>
             </li>
         </ul>
-        <p>Login</p>
+        <Link href="login">
+            <p>Login</p>
+        </Link>
+       
     </nav>
   );
 };
