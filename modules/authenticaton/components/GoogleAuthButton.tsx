@@ -22,7 +22,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ isLogin }) => {
   return (
     <button
       onClick={handleGoogleLogin}
-      className="w-full bg-blue-400 text-white py-2 rounded-md hover:bg-red-600 mt-4"
+      className="w-full bg-orange-100 text-white py-2 rounded-md hover:bg-red-600 mt-4"
     >
       {isLogin ? 'Sign in with Google' : 'Sign up with Google'} 
     </button>

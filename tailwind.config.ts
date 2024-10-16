@@ -18,12 +18,21 @@ const config: Config = {
           600: '#c4b2ba',
           700: '#e5d2cb',
         },
+        brown:{
+          100: '#312217',
+        },
+        orange:{
+          100: '#d46536',
+        },
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
       boxShadow: {
         '3xl': '20px 15px 15px rgba(0, 0, 0, 0.3)',
       },
+      backgroundImage: {
+        'book-pattern': "url('/bg1.png')",
+      }
     },
   },
   plugins: [],
