@@ -31,7 +31,7 @@ const VerifyPage = () => {
       await auth.currentUser.reload(); 
       if (auth.currentUser.emailVerified) {
         toast.success("Your email has been verified!");
-        router.push("/"); 
+        router.push("/profileSetup"); 
       }
     }
   };
