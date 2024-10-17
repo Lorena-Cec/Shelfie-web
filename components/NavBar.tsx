@@ -20,26 +20,30 @@ const NavBar = () => {
       };
 
   return (
-    <nav className="flex justify-between items-center py-4 px-10 bg-primary-100 text-white">
+    <nav className="flex justify-between items-center py-4 px-10 bg-orange-100 text-white">
         <div className="flex items-center">
         <img src="logo.png" alt="Logo" className="h-10  w-auto" />
         </div>
         <div>
-            <p>Search</p>
+            <input type="text" id="search-text" name="search-text" placeholder="Search books"></input>
         </div>
         <ul className='flex items-center gap-4'>
-            <li className="hover:bg-primary-200">
-                <Link href="/home" className="hover:text-white">My Books</Link>
+            <li className="hover:bg-orange-200">
+                <Link href="/home" className="hover:text-white">Home</Link>
             </li>
-            <li className="hover:bg-primary-200">
-                <p>Home</p>
+            <li className="hover:bg-orange-200">
+                <p>Feed</p>
             </li>
-            <li className="hover:bg-primary-200">
-                <p>Book lists</p>
+            <li className="hover:bg-orange-200">
+                <p>Shelves</p>
+            </li>
+            <li className="hover:bg-orange-200">
+                <p>Browse</p>
+            </li>
+            <li>
+            <p onClick={handleLogout} className='cursor-pointer'>Logout</p>
             </li>
         </ul>
-        <p onClick={handleLogout} className='cursor-pointer'>Logout</p>
-       
     </nav>
   );
 };

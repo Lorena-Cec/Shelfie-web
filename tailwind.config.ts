@@ -9,23 +9,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary:{
-          100: '#311440',
-          200: '#4a315a',
-          300: '#665178',
-          400: '#847397',
-          500: '#a190a7',
-          600: '#c4b2ba',
-          700: '#e5d2cb',
-        },
         brown:{
-          100: '#312217',
+          100: '#312217ff',
+          200: '#5A3B25ff',
+          300: '#83532Cff',
+          400: '#B47D50ff',
+          500: '#CEA17Dff',
+          600: '#EDD0BAff',
+          700: '#FFF7EAff',
         },
-        orange:{
-          100: '#d46536',
+        orange: {
+          100: '#72260Bff',
+          200: '#A14524ff',
+          300: '#D46536ff',
+          400: '#DF8739ff',
+          500: '#E9A73Bff',
+          600: '#FFCA72ff',
+          700: '#F7D08Fff',
         },
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        green: {
+          100: '#364937ff',
+          200: '#607A61ff',
+          300: '#749975ff',
+          400: '#87B789ff',
+          500: '#A4C7A6ff',
+          600: '#C4D9C5ff',
+          700: '#DEEBDFff',
+        },
+        background: "#FFF7EAff",
       },
       boxShadow: {
         '3xl': '20px 15px 15px rgba(0, 0, 0, 0.3)',

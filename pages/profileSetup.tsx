@@ -58,12 +58,12 @@ const Home: React.FC = () => {
   return (
     <div className="flex flex-col h-screen">
       <NavNewUser />
-      <div className="flex flex-col items-center bg-primary-700">
+      <div className="flex flex-col items-center bg-orange-700">
         <div className="flex flex-col gap-3 items-start mt-20 mb-10">
-          <p className='text-primary-100 open-sans text-2xl'>
+          <p className='text-brown-100 open-sans text-2xl'>
             Setup your profile
           </p>
-          <p className='text-primary-200 font-thin'>
+          <p className='text-brown-200 font-thin'>
             Tell people a little about yourself, where you are from and what interests you have.
           </p>
         </div>
