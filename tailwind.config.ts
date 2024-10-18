@@ -5,6 +5,8 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./modules/**/*.{js,ts,jsx,tsx,mdx}",
+    './node_modules/@material-tailwind/react/components/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@material-tailwind/react/theme/components/**/*.{js,ts,jsx,tsx}'
   ],
   theme: {
     extend: {
@@ -43,7 +45,10 @@ const config: Config = {
       },
       backgroundImage: {
         'book-pattern': "url('/bg1.png')",
-      }
+      },
+      width: {
+        '0.3':'30%',
+      },
     },
   },
   plugins: [],

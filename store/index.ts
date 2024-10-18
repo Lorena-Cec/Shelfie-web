@@ -12,17 +12,15 @@ const rootReducer = combineReducers({
   auth: authSlice,
 });
 
-// Uvođenje persist reducer-a
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
   reducer: persistedReducer,
 });
 
-// Kreiraj persist store
 const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
-export { store, persistor }; // Izvadi store i persistor
+export { store, persistor }; 

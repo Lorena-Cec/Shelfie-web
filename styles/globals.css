@@ -32,3 +32,47 @@ body {
     text-wrap: balance;
   }
 }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  border-radius: 15px; 
+  outline: none; 
+}
+
+/* Style for the track */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 35px; /* Track height */
+  border-radius: 15px; /* Rounded edges */
+}
+
+/* Style for the thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Removes default styles */
+  appearance: none;
+  width: 40px; /* Width of the thumb */
+  height: 40px; /* Height of the thumb */
+  border-radius: 50%; /* Round thumb */
+  background: #CEA17Dff; /* Thumb color */
+  cursor: pointer; /* Cursor on hover */
+}
+
+/* Other browsers support */
+input[type="range"]::-moz-range-thumb {
+  width: 20px; /* Width of the thumb */
+  height: 20px; /* Height of the thumb */
+  border-radius: 50%; /* Round thumb */
+  background: white; /* Thumb color */
+  border: 2px solid gray; /* Optional border */
+  cursor: pointer; /* Cursor on hover */
+}
+
+input[type="range"]::-ms-thumb {
+  width: 20px; /* Width of the thumb */
+  height: 20px; /* Height of the thumb */
+  border-radius: 50%; /* Round thumb */
+  background: white; /* Thumb color */
+  border: 2px solid gray; /* Optional border */
+  cursor: pointer; /* Cursor on hover */
+}

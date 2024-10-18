@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { sendEmailVerification, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../lib/firebaseConfig";
+import { auth } from "../../../lib/firebaseConfig";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify"; 
 import 'react-toastify/dist/ReactToastify.css';
@@ -31,7 +31,7 @@ const VerifyPage = () => {
       await auth.currentUser.reload(); 
       if (auth.currentUser.emailVerified) {
         toast.success("Your email has been verified!");
-        router.push("/profileSetup"); 
+        router.push("/setup/profileSetup"); 
       }
     }
   };
