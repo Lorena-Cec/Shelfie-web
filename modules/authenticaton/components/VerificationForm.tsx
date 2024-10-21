@@ -40,18 +40,24 @@ const VerifyPage = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserEmail(user.email); 
-        checkIfVerified(); 
       } else {
         setUserEmail(null);
       }
     });
 
-    return () => unsubscribe(); 
+    const intervalId = setInterval(() => {
+      checkIfVerified();
+    }, 5000); 
+
+    return () => {
+      clearInterval(intervalId); 
+      unsubscribe(); 
+    };
   }, []);
 
 
   const handleVerifyLater = () => {
-    router.push("/");
+    router.push("/setup/profileSetup");
   };
 
   return (

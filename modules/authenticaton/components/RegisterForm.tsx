@@ -39,7 +39,7 @@ const RegisterForm = () => {
         localStorage.setItem('rememberedEmail', email); 
       }
       await sendEmailVerification(user);
-      router.push('/verification');
+      router.push('/auth/verification');
     } catch (error) {
       toast.error('Error during registration. Please try again.');
     }
@@ -120,7 +120,7 @@ const RegisterForm = () => {
               <ToastContainer position="top-center" autoClose={3000} hideProgressBar />
             </div>
             <div className='overflow-hidden'>
-                <img src="bg1.png" alt="Background image" className='h-screen w-full object-cover'/>
+                <img src="../bg1.png" alt="Background image" className='h-screen w-full object-cover'/>
             </div>
         </div>
     </div>

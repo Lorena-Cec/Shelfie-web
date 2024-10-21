@@ -3,6 +3,7 @@ import NavNewUser from '@/modules/profileSetup/components/NavNewUser';
 import { useRouter } from 'next/router';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebaseConfig'; 
+import Link from 'next/link';
 
 const GoalsSetup: React.FC = () => {
     const [goals, setGoals] = useState<string[]>([]);
@@ -31,29 +32,40 @@ const GoalsSetup: React.FC = () => {
     };
 
     const sendInfo = async (e: React.FormEvent) => {
-        e.preventDefault();
-        
-        const user = auth.currentUser; 
-        if (user) {
-          const finalGoals = isOtherSelected && otherGoal ? [...goals.filter(h => h !== "Other"), otherGoal] : goals;
+      e.preventDefault();
+  
+      const user = auth.currentUser; 
+      if (!user) {
+          console.error('No authenticated user found.');
+          return;
+      }
+  
+      const finalGoals = isOtherSelected && otherGoal ? [...goals.filter(h => h !== "Other"), otherGoal] : goals;
+  
+      try {
           await setDoc(doc(db, 'users', user.uid), {
-            ProfileInfo: {  
-              goals: finalGoals,
-              booksToRead: booksToRead, // Spremanje broja knjiga
-            },
+              ProfileInfo: {  
+                  goals: finalGoals,
+                  booksToRead: booksToRead,
+              },
           }, { merge: true });
-        }
-    };
+          console.log("Goals saved successfully."); 
+          router.push('/setup/genreSelect');
+      } catch (error) {
+          console.error("Error saving goals: ", error);
+      }
+  };
+  
 
     const getTrackBackground = (value: number) => {
-      const percentage = (value - 1) / (100 - 1) * 100; // Izračunajte postotak
+      const percentage = (value - 1) / (100 - 1) * 100; 
       return `linear-gradient(to right, #D46536ff 0%, #D46536ff ${percentage}%, #CEA17Dff ${percentage}%, #CEA17Dff 100%)`;
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full bg-orange-700">
       <NavNewUser currentPage={2} />
-      <div className="flex flex-col items-center bg-orange-700">
+      <div className="flex flex-col items-center">
         <div className="flex flex-col gap-3 items-start mt-20 mb-5 w-0.3">
             <p className='text-brown-100 open-sans text-2xl'>
                 Set a Reading Goal
@@ -118,7 +130,6 @@ const GoalsSetup: React.FC = () => {
                     />
                 )}
               </div>
-            
               <button type="submit" className="w-full bg-orange-100 text-white py-2 rounded-md hover:bg-blue-600">
                   Save Reading Goals
               </button> 

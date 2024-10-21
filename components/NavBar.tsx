@@ -13,7 +13,7 @@ const NavBar = () => {
         try {
           await auth.signOut();
           dispatch(setUser(null)); 
-          router.push('/login'); 
+          router.push('/auth/login'); 
         } catch (error) {
           console.error('Error logging out: ', error);
         }

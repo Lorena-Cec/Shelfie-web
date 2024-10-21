@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import NavNewUser from '@/modules/profileSetup/components/NavNewUser';
 import { useRouter } from 'next/router';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebaseConfig'; // auth is needed to access the current user
+import { auth, db } from '@/lib/firebaseConfig'; 
 import Link from 'next/link';
 
 const ProfileSetup: React.FC = () => {
@@ -12,8 +12,8 @@ const ProfileSetup: React.FC = () => {
   const [aboutMe, setAboutMe] = useState('');
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [otherHobby, setOtherHobby] = useState('');
-  const [isOtherSelected, setIsOtherSelected] = useState(false); // For showing custom hobby input
-  
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
+
   const router = useRouter();
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -51,15 +51,17 @@ const ProfileSetup: React.FC = () => {
           aboutMe,
           hobbies: finalHobbies,
         },
-      }, { merge: true }); 
+      }, { merge: true });
+      console.log("Profile info saved successfully."); 
+      router.push('/setup/goalsSetup');
     }
 };
 
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full bg-orange-700">
       <NavNewUser currentPage = {1}/>
-      <div className="flex flex-col items-center bg-orange-700">
+      <div className="flex flex-col items-center">
         <div className="flex flex-col gap-3 items-start mt-20 mb-5 w-0.3">
           <p className='text-brown-100 open-sans text-2xl'>
             Setup your profile
@@ -69,7 +71,7 @@ const ProfileSetup: React.FC = () => {
           </p>
         </div>
         
-        <form onSubmit={sendInfo} className="space-y-3 w-0.3 bg-white border border-orange-400 rounded-lg px-20 py-10 mb-20">
+        <form onSubmit={sendInfo} className="space-y-3 w-0.3 bg-white border border-orange-400 rounded-lg px-20 py-10">
 
             <p className='text-brown-100 text-xs'>CITY</p>
             <input
@@ -144,13 +146,12 @@ const ProfileSetup: React.FC = () => {
                 )}
             </div>
 
-            <Link href="/goalsSetup" >
-                <button type="submit" className="w-full bg-orange-300 text-white py-2 mt-5 rounded-md hover:bg-blue-600">
-                    Save Profile Settings
-                </button>
-            </Link>
+            <button type="submit" className="w-full bg-orange-300 text-white py-2 mt-5 rounded-md hover:bg-blue-600">
+                Save Profile Settings
+            </button>
             
         </form>
+        <p className='p-10'>Skip for now</p>
       </div>
     </div>
   );

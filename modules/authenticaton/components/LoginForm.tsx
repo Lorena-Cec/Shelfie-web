@@ -150,7 +150,7 @@ const LoginForm = () => {
                 <ToastContainer position='top-center' className="whitespace-nowrap" autoClose={3000} hideProgressBar />
             </div>
             <div className='overflow-hidden'>
-                <img src="bg1.png" alt="Background image" className='h-screen w-full object-cover'/>
+                <img src="../bg1.png" alt="Background image" className='h-screen w-full object-cover'/>
             </div>
         </div>
     </div>
