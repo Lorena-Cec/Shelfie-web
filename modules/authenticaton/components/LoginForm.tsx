@@ -108,7 +108,7 @@ const LoginForm = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                        className="w-full px-4 text-brown-100 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-orange-400"
                     />
                     <p className='text-brown-100 text-xs'>PASSWORD</p>
                     <input
@@ -117,7 +117,7 @@ const LoginForm = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                        className="w-full px-4 text-brown-100 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-orange-400"
                     />
 
                     <div className="flex items-center mb-4">

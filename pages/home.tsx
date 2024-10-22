@@ -2,27 +2,71 @@ import NavBar from '@/components/NavBar';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/swiper-bundle.css';
+import { Navigation } from 'swiper/modules';
+
+
+interface Book {
+  primary_isbn13: string;
+  title: string;
+  author: string;
+  rank?: number;
+  book_image?: string;
+  description?: string;
+}
+
+interface BookList {
+  listType: string; 
+  books: Book[];
+}
 
 const Home: React.FC = () => {
-  const [books, setBooks] = useState<any[]>([]); // Stanje za pohranu knjiga
-  const [loading, setLoading] = useState<boolean>(true);
+  const [booksByList, setBooksByList] = useState<BookList[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const listTypes = [
+    'combined-print-and-e-book-fiction',
+    'graphic-books-and-manga',
+    'young-adult-hardcover',
+    'trade-fiction-paperback'
+  ];
+
   useEffect(() => {
-    const fetchBooks = async () => {
+    const fetchNytBooks = async () => {
+      setLoading(true);
+      setError(null);
+      const fetchedBooks: BookList[] = [];
+  
       try {
-        // Ovdje se može koristiti tvoj API ruter, npr. /api/books
-        const response = await axios.get('/api/books?searchTerm=bestsellers'); // Možeš promijeniti pojam pretrage
-        setBooks(response.data.items); // Postavi knjige u stanje
+        
+        const storedBooks = localStorage.getItem('nytBooks');
+        if (storedBooks) {
+          setBooksByList(JSON.parse(storedBooks));
+        } else {
+          
+          for (const listType of listTypes) {
+            const response = await axios.get(`/api/nytBooks?listType=${listType}`);
+            const limitedBooks = response.data.slice(0, 7); 
+            fetchedBooks.push({ listType, books: limitedBooks });
+            await new Promise(resolve => setTimeout(resolve, 1000)); 
+          }
+          
+          localStorage.setItem('nytBooks', JSON.stringify(fetchedBooks));
+          setBooksByList(fetchedBooks);
+        }
       } catch (err) {
-        setError('Failed to fetch books.'); // Postavi grešku ako ne uspije
+        console.error(err); 
+        setError('Failed to fetch books');
       } finally {
-        setLoading(false); // Postavi loading na false nakon što završi
+        setLoading(false);
       }
     };
-
-    fetchBooks();
-  }, []);
+  
+    fetchNytBooks();
+  }, []); 
+  
 
   return (
     <div className="flex flex-col h-screen">
@@ -37,89 +81,109 @@ const Home: React.FC = () => {
           </p>
         </div>
 
-        {/* Prikaz trenutne knjige */}
-        <div className='flex flex-col items-center bg-orange-400 p-8 mt-8 gap-3'>
-          <p>Currently reading:</p>
+        <div className='px-32'>
           {loading ? (
-            <p>Loading...</p> // Prikaz loading poruke dok se podaci učitavaju
+            <p>Loading...</p>
           ) : error ? (
-            <p>{error}</p> // Prikaz greške ako se dogodila
+            <p>{error}</p>
           ) : (
-            books.slice(0, 1).map((book) => ( // Prikaz samo prve knjige iz rezultata
-              <div className='flex gap-12' key={book.id}>
-                <img src={book.volumeInfo.imageLinks?.thumbnail} alt={book.volumeInfo.title} className='w-32 h-44 bg-orange-100 shadow-3xl' />
-                <div className='flex flex-col justify-between py-3'>
-                  <p>{book.volumeInfo.title}</p>
-                  <p>Progress: 30% left</p>
-                  <Link href={`/books/${book.id}`}>Continue reading</Link>
+            booksByList.map((list, index) => (
+              <div key={index}>
+                <div className='pt-12 pb-8'>
+                  <p className='text-brown-100 open-sans text-3xl'>
+                    {list.listType === 'combined-print-and-e-book-fiction' 
+                      ? 'Popular Now' 
+                      : list.listType.replace(/-/g, ' ').replace('and', '&')}
+                  </p>
+                </div>
+                <div className='flex gap-24'>
+                  {list.listType === 'graphic-books-and-manga' && (
+                    <Swiper
+                      modules={[Navigation]}
+                      spaceBetween={40} 
+                      slidesPerView={2.3} 
+                      grabCursor={true}
+                      loop={true}
+                    >
+                      {list.books.slice(0, 5).map((book: Book) => (
+                        <SwiperSlide key={book.primary_isbn13}>
+                          <div className='flex gap-12 bg-orange-400 p-10 w-fit'>
+                            <div
+                              className='w-56 h-72 bg-orange-100 shadow-brown-300 shadow-3xl'
+                              style={{
+                                backgroundImage: `url(${book.book_image})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                              }}
+                            >
+                              {!book.book_image && (
+                                <p className='flex items-center justify-center h-full'>No Image Available</p>
+                              )}
+                            </div>
+                            <div className='flex flex-col justify-between py-3'>
+                              <div>
+                                <p className='font-bold'>{book.title || 'No Title Available'}</p>
+                                <p>{book.author || 'No Author Available'}</p>
+                              </div>
+                              <p className='w-80'>
+                                {book.description || 'No Description Available'}
+                              </p>
+                              <p className='text-blue-500 cursor-pointer'>Read more...</p>
+                            </div>
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  )}
+
+                  {list.listType === 'combined-print-and-e-book-fiction' && list.books.slice(0, 7).map((book: Book) => (
+                    <div className='flex flex-col text-center gap-2' key={book.primary_isbn13}>
+                      <p className='text-brown-200 font-bold text-3xl'>{book.rank || 'N/A'}</p>
+                      {book.book_image ? (  
+                        <img 
+                          src={book.book_image}  
+                          alt={book.title} 
+                          className='w-44 h-56 bg-orange-100 shadow-3xl mb-4' 
+                        />
+                      ) : (
+                        <div className='w-44 h-56 bg-gray-200 shadow-3xl mb-4 flex items-center justify-center'>
+                          <p>No Image Available</p>
+                        </div>
+                      )}
+                      <p className='text-brown-200 font-thin'>{book.title || 'No Title Available'}</p> 
+                      <p className='text-brown-200 font-thin'>{book.author || 'No Author Available'}</p>
+                    </div>
+                  ))}
+
+                  {list.listType === 'young-adult-hardcover' && (
+                    <div className='bg-orange-300 flex w-full gap-4 p-4'>
+                      {list.listType === 'young-adult-hardcover' && list.books.slice(0, 4).map((book: Book) => (
+                        <div className='flex flex-col items-center text-center gap-2 w-1/4' key={book.primary_isbn13}>
+                          {book.book_image ? (  
+                            <img 
+                              src={book.book_image}  
+                              alt={book.title} 
+                              className='w-44 h-56 bg-orange-100 shadow-3xl mb-4' 
+                            />
+                          ) : (
+                            <div className='w-44 h-56 bg-gray-200 shadow-3xl mb-4 flex items-center justify-center'>
+                              <p>No Image Available</p>
+                            </div>
+                          )}
+                          <p className='text-brown-200 font-thin'>{book.title || 'No Title Available'}</p> 
+                          <p className='text-brown-200 font-thin'>{book.author || 'No Author Available'}</p>
+                        </div>
+                      ))}
+                      
+                        <img src="/wallpaper.png" alt="Wallpaper" className='w-80' />
+                      
+                    </div>
+                  )}
+
                 </div>
               </div>
             ))
           )}
-        </div>
-
-        {/* Prikaz popularnih knjiga */}
-        <div className='px-32'>
-          <div className='pt-12 pb-8'>
-            <p className='text-brown-100 open-sans text-3xl'>Popular now</p>
-          </div>
-          <div className='flex gap-24'>
-            {loading ? (
-              <p>Loading...</p> // Prikaz loading poruke dok se podaci učitavaju
-            ) : error ? (
-              <p>{error}</p> // Prikaz greške ako se dogodila
-            ) : (
-              books.slice(1, 5).map((book) => ( // Prikaz 4 knjige
-                <div className='flex flex-col text-center gap-2' key={book.id}>
-                  <img src={book.volumeInfo.imageLinks?.thumbnail} alt={book.volumeInfo.title} className='w-44 h-56 bg-orange-100 shadow-3xl mb-4' />
-                  <p className='text-brown-200 font-thin'>{book.volumeInfo.title}</p>
-                  <p className='text-brown-200 font-thin'>{book.volumeInfo.authors?.[0]}</p>
-                  <p className='text-brown-200 font-thin'>Rating: {book.volumeInfo.averageRating || 'N/A'}</p>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Ostatak koda ostaje nepromijenjen */}
-          <div className='pt-24 pb-8'>
-                    <p className='text-brown-100 open-sans text-3xl'>Most read this week</p>
-                </div>
-                <div className='flex gap-10'>
-                    <div className='flex gap-12 bg-orange-400 p-14 w-fit '>
-                        <div className='w-56 h-72 bg-orange-100 shadow-brown-300 shadow-3xl'></div>
-                        <div className='flex flex-col justify-between py-3'>
-                            <div>
-                                <p>Name of the book</p>
-                                <p>Author</p>
-                                <p>Rating</p>
-                            </div>
-                            <p className='w-96'>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                            </p>
-                            <p>Read more...</p>
-                        </div>
-                    </div>
-
-                    <div className='flex gap-12 bg-orange-400 p-14 w-fit '>
-                        <div className='w-56 h-72 bg-orange-100 shadow-brown-300 shadow-3xl'></div>
-                        <div className='flex flex-col justify-between py-3'>
-                            <div>
-                                <p>Name of the book</p>
-                                <p>Author</p>
-                                <p>Rating</p>
-                            </div>
-                            <p className='w-96'>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                            </p>
-                            <p>Read more...</p>
-                        </div>
-                    </div>
-                </div>
-                <div className='py-12'>
-                    <p className='text-brown-100 open-sans text-3xl'>Readers choice 2024</p>
-                </div>
         </div>
       </div>
     </div>
