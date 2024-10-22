@@ -9,6 +9,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import GoogleAuthButton from './GoogleAuthButton';
 import { doc, setDoc } from 'firebase/firestore';
+import createShelvesForUser from '@/hooks/createShelvesForUser';
 
 const RegisterForm = () => {
   const [name, setName] = useState('');
@@ -33,6 +34,8 @@ const RegisterForm = () => {
         name,
         email,
       });
+
+      await createShelvesForUser(user.uid);
 
       dispatch(setUser(userData)); //firebase persistence auth
       if (rememberMe) {

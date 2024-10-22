@@ -25,26 +25,13 @@ const NavBar = () => {
         }
       };
 
-      const handleSearch = async () => {
+      const handleSearch = () => {
         if (!searchTerm) return;
-    
-        setLoading(true);
-        setError(null);
-    
-        try {
-          const response = await axios.get('/api/books', {
-            params: {
-              searchType,
-              searchTerm, 
-            },
-          });
-          setBooks(response.data.items || []); 
-        } catch (err) {
-          setError('Failed to fetch books');
-        } finally {
-          setLoading(false);
-        }
-      };
+        router.push({
+            pathname: '/search',
+            query: { searchType, searchTerm }, 
+        });
+    };
 
   return (
     <nav className="flex justify-between items-center py-4 px-10 bg-orange-100 text-white">
@@ -85,7 +72,7 @@ const NavBar = () => {
                 <p>Feed</p>
             </li>
             <li className="hover:bg-orange-200">
-                <p>Shelves</p>
+                <Link href="/shelves" className="hover:text-white">Shelves</Link>
             </li>
             <li className="hover:bg-orange-200">
                 <p>Browse</p>
