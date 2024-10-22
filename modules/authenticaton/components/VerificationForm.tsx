@@ -62,7 +62,7 @@ const VerifyPage = () => {
 
   return (
     <div className="bg-book-pattern bg-cover bg-center min-h-screen flex justify-center items-center">
-      <div className="bg-orange-300 w-96 p-6 rounded-lg shadow-lg">
+      <div className="bg-orange-600 w-96 p-6 rounded-lg shadow-lg">
         <h1 className='text-4xl text-center mb-6 text-brown-100 font-extrabold tracking-tighter'>
           Shelfie
         </h1>

@@ -29,9 +29,17 @@ const Home: React.FC = () => {
   const listTypes = [
     'combined-print-and-e-book-fiction',
     'graphic-books-and-manga',
+    'trade-fiction-paperback',
     'young-adult-hardcover',
-    'trade-fiction-paperback'
   ];
+
+  const listTitleMap: { [key: string]: string } = {
+    'combined-print-and-e-book-fiction': 'Current Book Ranking',
+    'graphic-books-and-manga': 'Graphic Novels',
+    'trade-fiction-paperback': 'Readers Choice',
+    'young-adult-hardcover': 'Young Adult Favorites',
+  };
+  
 
   useEffect(() => {
     const fetchNytBooks = async () => {
@@ -48,7 +56,7 @@ const Home: React.FC = () => {
           
           for (const listType of listTypes) {
             const response = await axios.get(`/api/nytBooks?listType=${listType}`);
-            const limitedBooks = response.data.slice(0, 7); 
+            const limitedBooks = response.data.slice(0, 10); 
             fetchedBooks.push({ listType, books: limitedBooks });
             await new Promise(resolve => setTimeout(resolve, 1000)); 
           }
@@ -69,9 +77,9 @@ const Home: React.FC = () => {
   
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col min-h-screen">
       <NavBar />
-      <div className='flex flex-col flex-1 bg-orange-700'>
+      <div className='flex flex-col flex-1 bg-orange-700 pb-20'>
         <div className="flex flex-col gap-3 text-center items-center mt-32 mb-10">
           <p className='text-brown-100 open-sans text-4xl'>
             But first, let's take a Shelfie!
@@ -81,7 +89,19 @@ const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className='px-32'>
+        <div className='flex flex-col items-center bg-orange-400 p-8 mt-8 gap-3'>
+                <p>Currently reading:</p>
+                <div className='flex gap-12'>
+                    <div className='w-32 h-44 bg-orange-100 shadow-3xl'></div>
+                    <div className='flex flex-col justify-between py-3'>
+                            <p>Name of the book</p>
+                            <p>Progress: 30% left</p>
+                            <p>Continue reading</p>
+                    </div>
+                </div>
+            </div>
+
+        <div className=''>
           {loading ? (
             <p>Loading...</p>
           ) : error ? (
@@ -89,14 +109,12 @@ const Home: React.FC = () => {
           ) : (
             booksByList.map((list, index) => (
               <div key={index}>
-                <div className='pt-12 pb-8'>
-                  <p className='text-brown-100 open-sans text-3xl'>
-                    {list.listType === 'combined-print-and-e-book-fiction' 
-                      ? 'Popular Now' 
-                      : list.listType.replace(/-/g, ' ').replace('and', '&')}
+                <div className='pt-12 pb-8 px-32'>
+                  <p className="text-brown-100 open-sans text-3xl">
+                    {listTitleMap[list.listType] || list.listType.replace(/-/g, ' ').replace('and', '&')}
                   </p>
                 </div>
-                <div className='flex gap-24'>
+                <div className='flex gap-24 px-32'>
                   {list.listType === 'graphic-books-and-manga' && (
                     <Swiper
                       modules={[Navigation]}
@@ -107,7 +125,7 @@ const Home: React.FC = () => {
                     >
                       {list.books.slice(0, 5).map((book: Book) => (
                         <SwiperSlide key={book.primary_isbn13}>
-                          <div className='flex gap-12 bg-orange-400 p-10 w-fit'>
+                          <div className='flex gap-12 bg-orange-400 p-10 w-fit '>
                             <div
                               className='w-56 h-72 bg-orange-100 shadow-brown-300 shadow-3xl'
                               style={{
@@ -156,8 +174,8 @@ const Home: React.FC = () => {
                   ))}
 
                   {list.listType === 'young-adult-hardcover' && (
-                    <div className='bg-orange-300 flex w-full gap-4 p-4'>
-                      {list.listType === 'young-adult-hardcover' && list.books.slice(0, 4).map((book: Book) => (
+                    <div className='bg-orange-300 flex w-full gap-4 p-10 items-center'>
+                      {list.listType === 'young-adult-hardcover' && list.books.slice(0, 5).map((book: Book) => (
                         <div className='flex flex-col items-center text-center gap-2 w-1/4' key={book.primary_isbn13}>
                           {book.book_image ? (  
                             <img 
@@ -180,12 +198,70 @@ const Home: React.FC = () => {
                     </div>
                   )}
 
+                  {list.listType === 'trade-fiction-paperback' && list.books.slice(1, 7).map((book: Book) => (
+                    <div className='flex flex-col items-center text-center gap-2 w-1/4' key={book.primary_isbn13}>
+                      {book.book_image ? (  
+                        <img 
+                          src={book.book_image}  
+                          alt={book.title} 
+                          className='w-44 h-56 bg-orange-100 shadow-3xl mb-4' 
+                        />
+                      ) : (
+                        <div className='w-44 h-56 bg-gray-200 shadow-3xl mb-4 flex items-center justify-center'>
+                          <p>No Image Available</p>
+                        </div>
+                      )}
+                      <p className='text-brown-200 font-thin'>{book.title || 'No Title Available'}</p> 
+                      <p className='text-brown-200 font-thin'>{book.author || 'No Author Available'}</p>
+                    </div>
+                  ))}
+
                 </div>
               </div>
             ))
           )}
         </div>
       </div>
+      <footer className="bg-orange-800 text-white py-8 px-32 pt-12">
+        <div className="container mx-auto grid grid-cols-1  md:grid-cols-3 gap-8">
+
+          <div className="flex flex-col">
+            <h3 className="text-xl font-bold mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-sm">
+              <li><a href="/" className="hover:text-gray-300">Home</a></li>
+              <li><a href="/bestsellers" className="hover:text-gray-300">Bestsellers</a></li>
+              <li><a href="/categories" className="hover:text-gray-300">Categories</a></li>
+              <li><a href="/contact" className="hover:text-gray-300">Contact Us</a></li>
+              <li><a href="/terms" className="hover:text-gray-300">Terms & Conditions</a></li>
+            </ul>
+          </div>
+
+          <div className="flex flex-col">
+            <h3 className="text-xl font-bold mb-4">Contact Us</h3>
+            <ul className="space-y-2 text-sm">
+              <li>Email: <a href="mailto:support@bookshelf.com" className="hover:text-gray-300">support@shelfie.com</a></li>
+              <li>Phone: <a href="tel:+123456789" className="hover:text-gray-300">+123 456 789</a></li>
+              <li>Follow us on:
+                <div className="flex space-x-3 mt-2">
+                  <a href="https://facebook.com" target="_blank" className="hover:text-gray-300">Facebook</a>
+                  <a href="https://instagram.com" target="_blank" className="hover:text-gray-300">Instagram</a>
+                  <a href="https://twitter.com" target="_blank" className="hover:text-gray-300">Twitter</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div className="flex flex-col pr-10">
+            <h3 className="text-xl font-bold mb-4">About Us</h3>
+            <p className="text-sm">
+              Welcome to our book tracking platform, where you can shelf your books, track your reading progress, and explore the latest bestsellers. Stay tuned for exciting features and a wide selection of genres!
+            </p>
+          </div>
+        </div>
+        <div className="mt-8 text-center text-xs text-gray-400">
+          <p>&copy; {new Date().getFullYear()} Shelfie. All rights reserved.</p>
+        </div>
+      </footer>
+
     </div>
   );
 };
