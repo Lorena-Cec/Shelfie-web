@@ -66,6 +66,11 @@ const SearchPage = () => {
         authors: book.volumeInfo.authors,
         image: book.volumeInfo.imageLinks?.thumbnail,
         publishedDate: book.volumeInfo.publishedDate,
+        rating: 0, 
+        addedDate: new Date().toISOString(), 
+        startReading: null,
+        readDate: null,
+        review: ''
       };
 
       const shelfRef = doc(db, 'users', userId, 'shelves', shelf);
@@ -74,14 +79,14 @@ const SearchPage = () => {
         books: arrayUnion(bookData),
       }, { merge: true }); 
 
-      console.log(`Added book ${book.id} to ${shelf} shelf successfully!`);
+      console.log(`Added book ${book.title} to ${shelf} shelf successfully!`);
     } catch (error) {
       console.error('Error adding book to shelf:', error);
     }
   };
 
   return (
-    <div className="flex flex-col bg-orange-700">
+    <div className="flex flex-col min-h-screen bg-orange-700">
       <NavBar />
       <h1 className="text-2xl my-10 text-center text-brown-100">Search Results for "{searchTerm}"</h1>
       <div className='flex flex-col items-center px-32 mb-20'>
@@ -92,38 +97,39 @@ const SearchPage = () => {
       ) : (
         <div className="flex flex-col w-fit gap-6">
           {books.map((book) => (
-            <div key={book.id} className="flex items-center p-4 border rounded-md w-full justify-between">
+            <div key={book.id} className="grid grid-cols-6 gap-4 place-items-start px-16 py-8 bg-orange-600">
               <div className="flex-shrink-0">
                 <img 
                   src={book.volumeInfo.imageLinks?.thumbnail} 
                   alt={book.volumeInfo.title} 
-                  className="w-36 h-48 mr-4"
+                  className="w-36 h-52 mr-4"
                 />
               </div>
-              
-              <div className="">
-                <h2 className="text-lg font-bold text-brown-100">{book.volumeInfo.title}</h2>
-                <p className="text-sm">by {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}</p>
-                <p className="text-sm">Published: {book.volumeInfo.publishedDate || 'N/A'}</p>
-                <p className="text-sm mt-2">{book.volumeInfo.description?.slice(0, 150)}...</p>
+              <div className="col-span-4 flex flex-col justify-between h-full">
+                <div>
+                  <h2 className="text-xl font-bold text-brown-100">{book.volumeInfo.title}</h2>
+                  <p className="text-brown-200 text-lg">by {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}</p>
+                  <p className="text-brown-300">Published: {book.volumeInfo.publishedDate || 'N/A'}</p>
+                </div>
+                <p className="text-brown-200 text-lg mb-4">{book.volumeInfo.description?.slice(0, 100)}...{" "}
+                  <a href="/bookInfo" className='text-brown-300 hover:text-brown-100'>Find out more</a></p>
               </div>
-
-              <div className="flex-shrink-0 ml-4">
+              <div className="flex flex-col ml-4">
                 <button 
                   onClick={() => handleAddToShelf(book, 'Read')}
-                  className="bg-orange-200 hover:bg-orange-300 text-brown-500 px-4 py-2 rounded-md mb-2"
+                  className="bg-orange-200 hover:bg-orange-300 text-brown-700 px-4 py-2 rounded-md mb-2"
                 >
                   Add to Read
                 </button>
                 <button 
                   onClick={() => handleAddToShelf(book, 'Currently Reading')}
-                  className="bg-orange-200 hover:bg-orange-300 text-brown-500 px-4 py-2 rounded-md mb-2"
+                  className="bg-orange-200 hover:bg-orange-300 text-brown-700 px-4 py-2 rounded-md mb-2"
                 >
                   Currently Reading
                 </button>
                 <button 
                   onClick={() => handleAddToShelf(book, 'To Read')}
-                  className="bg-orange-200 hover:bg-orange-300 text-brown-500 px-4 py-2 rounded-md"
+                  className="bg-orange-200 hover:bg-orange-300 text-brown-700 px-4 py-2 rounded-md"
                 >
                   To Read
                 </button>
