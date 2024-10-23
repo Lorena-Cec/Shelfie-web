@@ -5,6 +5,9 @@ import axios from 'axios';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/swiper-bundle.css';
 import { Navigation } from 'swiper/modules';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from '@/lib/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 
 interface Book {
@@ -39,6 +42,20 @@ const Home: React.FC = () => {
     'trade-fiction-paperback': 'Readers Choice',
     'young-adult-hardcover': 'Young Adult Favorites',
   };
+
+  const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<any[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   
 
   useEffect(() => {
@@ -74,6 +91,28 @@ const Home: React.FC = () => {
   
     fetchNytBooks();
   }, []); 
+
+  useEffect(() => {
+    const fetchCurrentlyReadingBooks = async () => {
+      if (!userId) return;
+
+      try {
+        const shelfRef = doc(db, 'users', userId, 'shelves', 'Currently Reading');
+        const shelfSnap = await getDoc(shelfRef);
+        
+        if (shelfSnap.exists()) {
+          setCurrentlyReadingBooks(shelfSnap.data().books || []);
+        } else {
+          console.log("No such shelf!");
+          setCurrentlyReadingBooks([]);
+        }
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      }
+    };
+
+    fetchCurrentlyReadingBooks();
+  }, [userId]);
   
 
   return (
@@ -90,16 +129,22 @@ const Home: React.FC = () => {
         </div>
 
         <div className='flex flex-col items-center bg-orange-400 p-8 mt-8 gap-3'>
-                <p>Currently reading:</p>
-                <div className='flex gap-12'>
-                    <div className='w-32 h-44 bg-orange-100 shadow-3xl'></div>
-                    <div className='flex flex-col justify-between py-3'>
-                            <p>Name of the book</p>
-                            <p>Progress: 30% left</p>
-                            <p>Continue reading</p>
-                    </div>
+          <p className='text-xl font-bold mb-4'>You are currently reading:</p>
+          <div className='flex gap-12'>
+            {currentlyReadingBooks.map((book) => (
+              <div key={book.id} className='flex gap-6'>
+                <div className='w-32 h-44 bg-orange-100 shadow-3xl'>
+                  <img src={book.image} alt={book.title} className="object-cover w-full h-full" />
                 </div>
-            </div>
+                <div className='flex flex-col justify-between py-5'>
+                  <p className='text-brown-200 text-lg font-extrabold w-4/5'>{book.title}</p>
+                  <p>Progress: {book.progress ? `${book.progress}% left` : 'N/A'}</p>
+                  <p className='text-orange-200 hover:underline'>Continue reading</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className=''>
           {loading ? (
