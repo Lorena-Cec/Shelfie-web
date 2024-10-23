@@ -113,6 +113,12 @@ const Home: React.FC = () => {
 
     fetchCurrentlyReadingBooks();
   }, [userId]);
+
+
+  const calculateRemainingPercentage = (pagesRead: number, totalPages: number) => {
+    if (totalPages === 0) return 0; 
+    return Math.max(0, ((totalPages - pagesRead) / totalPages) * 100); 
+  };
   
 
   return (
@@ -131,20 +137,24 @@ const Home: React.FC = () => {
         <div className='flex flex-col items-center bg-orange-400 p-8 mt-8 gap-3'>
           <p className='text-xl font-bold mb-4'>You are currently reading:</p>
           <div className='flex gap-12'>
-            {currentlyReadingBooks.map((book) => (
-              <div key={book.id} className='flex gap-6'>
-                <div className='w-32 h-44 bg-orange-100 shadow-3xl'>
-                  <img src={book.image} alt={book.title} className="object-cover w-full h-full" />
+            {currentlyReadingBooks.map((book) => {
+              const remainingPercentage = calculateRemainingPercentage(book.pagesRead, book.pagesTotal);
+              return (
+                <div key={book.id} className='flex gap-6'>
+                  <div className='w-32 h-44 bg-orange-100 shadow-3xl'>
+                    <img src={book.image} alt={book.title} className="object-cover w-full h-full" />
+                  </div>
+                  <div className='flex flex-col justify-between py-5'>
+                    <p className='text-brown-200 text-lg font-extrabold w-4/5'>{book.title}</p>
+                    <p>Progress: {remainingPercentage.toFixed(0)}% left</p> {/* Prikazuje preostali postotak */}
+                    <a href="/shelves" className='text-orange-200 hover:underline'>Update progress</a>
+                  </div>
                 </div>
-                <div className='flex flex-col justify-between py-5'>
-                  <p className='text-brown-200 text-lg font-extrabold w-4/5'>{book.title}</p>
-                  <p>Progress: {book.progress ? `${book.progress}% left` : 'N/A'}</p>
-                  <p className='text-orange-200 hover:underline'>Continue reading</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
+
 
         <div className=''>
           {loading ? (

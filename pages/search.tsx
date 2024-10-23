@@ -84,6 +84,7 @@ const SearchPage = () => {
         authors: book.volumeInfo.authors,
         image: book.volumeInfo.imageLinks?.thumbnail,
         publishedDate: book.volumeInfo.publishedDate,
+        pagesTotal: book.volumeInfo.pageCount,
         rating: 0, 
         addedDate: new Date().toISOString(), 
         startReading: null,
@@ -98,7 +99,7 @@ const SearchPage = () => {
       }, { merge: true }); 
 
       console.log(`Added book ${book.title} to ${shelf} shelf successfully!`);
-      fetchUserShelves(userId); // Refresh shelf info
+      fetchUserShelves(userId); 
     } catch (error) {
       console.error('Error adding book to shelf:', error);
     }
