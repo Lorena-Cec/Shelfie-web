@@ -4,7 +4,7 @@ import { googleProvider, auth } from '../../../lib/firebaseConfig';
 import { useRouter } from 'next/router';
 
 interface GoogleAuthButtonProps {
-  isLogin: boolean; 
+  isLogin: boolean;
 }
 
 const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ isLogin }) => {
@@ -24,7 +24,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ isLogin }) => {
       onClick={handleGoogleLogin}
       className="w-full bg-orange-100 text-white py-2 rounded-md hover:bg-red-600 mt-4"
     >
-      {isLogin ? 'Sign in with Google' : 'Sign up with Google'} 
+      {isLogin ? 'Sign in with Google' : 'Sign up with Google'}
     </button>
   );
 };

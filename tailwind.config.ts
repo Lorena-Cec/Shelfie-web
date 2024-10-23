@@ -1,17 +1,17 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./modules/**/*.{js,ts,jsx,tsx,mdx}",
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './modules/**/*.{js,ts,jsx,tsx,mdx}',
     './node_modules/@material-tailwind/react/components/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@material-tailwind/react/theme/components/**/*.{js,ts,jsx,tsx}'
+    './node_modules/@material-tailwind/react/theme/components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
       colors: {
-        brown:{
+        brown: {
           100: '#312217ff',
           200: '#5A3B25ff',
           300: '#83532Cff',
@@ -38,7 +38,7 @@ const config: Config = {
           600: '#C4D9C5ff',
           700: '#DEEBDFff',
         },
-        background: "#FFF7EAff",
+        background: '#FFF7EAff',
       },
       boxShadow: {
         '3xl': '20px 15px 15px rgba(0, 0, 0, 0.3)',
@@ -47,7 +47,7 @@ const config: Config = {
         'book-pattern': "url('/bg1.png')",
       },
       width: {
-        '0.3':'30%',
+        '0.3': '30%',
       },
     },
   },

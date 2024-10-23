@@ -1,14 +1,21 @@
-// /modules/shelves/hooks/useShelves.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { auth, db } from '@/lib/firebaseConfig';
-import { doc, getDoc, setDoc, arrayUnion } from "firebase/firestore"; 
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { Book } from '../models/Book';
 
 const useShelves = () => {
   const [selectedShelf, setSelectedShelf] = useState<string>('Read');
-  const [books, setBooks] = useState<any[]>([]); 
-  const [userId, setUserId] = useState<string | null>(null); 
-  const [hoveredRatings, setHoveredRatings] = useState<{ [key: string]: number | null }>({});
+  const [books, setBooks] = useState<Book[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [hoveredRatings, setHoveredRatings] = useState<{
+    [key: string]: number | null;
+  }>({});
+  const router = useRouter();
+  const { shelf } = router.query;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -18,24 +25,24 @@ const useShelves = () => {
         setUserId(null);
       }
     });
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     const fetchBooks = async () => {
-      if (!userId) return; 
+      if (!userId) return;
       try {
         const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
         const shelfSnap = await getDoc(shelfRef);
-        
+
         if (shelfSnap.exists()) {
-          setBooks(shelfSnap.data().books || []); 
+          setBooks(shelfSnap.data().books || []);
         } else {
-          console.log("No such shelf!");
-          setBooks([]); 
+          console.log('No such shelf!');
+          setBooks([]);
         }
       } catch (error) {
-        console.error("Error fetching books:", error);
+        console.error('Error fetching books:', error);
       }
     };
 
@@ -44,13 +51,22 @@ const useShelves = () => {
     }
   }, [selectedShelf, userId]);
 
-  const handleShelfSelect = (shelf: string) => {
-    setSelectedShelf(shelf);
+  const handleShelfSelect = (shelfName: string) => {
+    setSelectedShelf(shelfName);
   };
+
+  useEffect(() => {
+    if (
+      shelf &&
+      (shelf === 'Read' || shelf === 'Currently Reading' || shelf === 'To Read')
+    ) {
+      setSelectedShelf(shelf as string);
+    }
+  }, [shelf, setSelectedShelf]);
 
   const handleDeleteBook = async (bookId: string) => {
     try {
-      if (!userId) return; 
+      if (!userId) return;
       const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
       const shelfSnap = await getDoc(shelfRef);
 
@@ -60,6 +76,7 @@ const useShelves = () => {
 
         await setDoc(shelfRef, { books: updatedBooks }, { merge: true });
         setBooks(updatedBooks);
+        toast.success(`Book has been removed from the shelf!`);
       }
     } catch (error) {
       console.error('Error deleting book:', error);
@@ -71,32 +88,96 @@ const useShelves = () => {
       await handleDeleteBook(bookId);
 
       const book = books.find((b: any) => b.id === bookId);
-      if (!userId) return; 
+      if (!userId || !book) return;
 
       const newShelfRef = doc(db, 'users', userId, 'shelves', newShelf);
       const newShelfSnap = await getDoc(newShelfRef);
-      const newBooks = (newShelfSnap.exists() ? newShelfSnap.data().books : []) || [];
+      const newBooks =
+        (newShelfSnap.exists() ? newShelfSnap.data().books : []) || [];
 
-      await setDoc(newShelfRef, { books: [...newBooks, book] }, { merge: true });
+      await setDoc(
+        newShelfRef,
+        { books: [...newBooks, book] },
+        { merge: true }
+      );
+
+      toast.success(`Book has been moved to the ${newShelf} shelf!`);
     } catch (error) {
       console.error('Error moving book:', error);
+
+      toast.error('Error moving book. Please try again.');
     }
   };
 
-  const handleUpdateBook = async (bookId: string, field: string, value: any) => {
+  const moveBookToShelf = async (
+    bookId: string,
+    newShelf: string,
+    updatedBooks: any[]
+  ) => {
     try {
-      if (!userId) return; 
+      if (!userId) return;
+      const currentShelfRef = doc(
+        db,
+        'users',
+        userId,
+        'shelves',
+        selectedShelf
+      );
+      const newShelfRef = doc(db, 'users', userId, 'shelves', newShelf);
+
+      const currentBooks = updatedBooks.filter(
+        (book: any) => book.id !== bookId
+      );
+      await setDoc(currentShelfRef, { books: currentBooks }, { merge: true });
+
+      setBooks(currentBooks);
+
+      const newShelfSnap = await getDoc(newShelfRef);
+      const newShelfBooks = newShelfSnap.exists()
+        ? newShelfSnap.data().books || []
+        : [];
+      const bookToMove = updatedBooks.find((book: any) => book.id === bookId);
+
+      await setDoc(
+        newShelfRef,
+        { books: [...newShelfBooks, bookToMove] },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error('Error moving book to shelf:', error);
+    }
+  };
+
+  const handleUpdateBook = async (
+    bookId: string,
+    field: string,
+    value: any
+  ) => {
+    try {
+      if (!userId) return;
       const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
       const shelfSnap = await getDoc(shelfRef);
-      
+
       if (shelfSnap.exists()) {
         const books = shelfSnap.data().books || [];
-        const updatedBooks = books.map((book: any) => 
+        const updatedBooks = books.map((book: any) =>
           book.id === bookId ? { ...book, [field]: value } : book
         );
-        
+
         await setDoc(shelfRef, { books: updatedBooks }, { merge: true });
-        setBooks(updatedBooks);   
+        setBooks(updatedBooks);
+
+        if (field === 'startReading' && value && selectedShelf === 'To Read') {
+          await moveBookToShelf(bookId, 'Currently Reading', updatedBooks);
+          toast.success('Book moved to Currently Reading shelf');
+        } else if (
+          field === 'readDate' &&
+          value &&
+          (selectedShelf === 'To Read' || selectedShelf === 'Currently Reading')
+        ) {
+          await moveBookToShelf(bookId, 'Read', updatedBooks);
+          toast.success('Book moved to Read shelf');
+        }
       }
     } catch (error) {
       console.error('Error updating book:', error);

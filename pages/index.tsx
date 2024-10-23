@@ -1,7 +1,6 @@
-import { auth } from "@/lib/firebaseConfig";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
-
+import { auth } from '@/lib/firebaseConfig';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
 export default function Home() {
   const router = useRouter();
@@ -19,7 +18,7 @@ export default function Home() {
 
     checkAuth();
   }, [router]);
-  
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-orange-700">
       <h1 className="text-4xl font-bold open-sans text-brown-100 mb-4 tracking-tighter">

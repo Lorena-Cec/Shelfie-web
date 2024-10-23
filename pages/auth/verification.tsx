@@ -1,8 +1,8 @@
-import React from "react";
-import VerificationForm from "@/modules/authenticaton/components/VerificationForm"
+import React from 'react';
+import VerificationForm from '@/modules/authenticaton/components/VerificationForm';
 
 const Verification = () => {
-  return(
+  return (
     <div>
       <VerificationForm></VerificationForm>
     </div>
