@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebaseConfig';
-import { doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 
 const createShelvesForUser = async (userId: string) => {
   const userDocRef = doc(db, 'users', userId);

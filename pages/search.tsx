@@ -4,20 +4,20 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import NavBar from '@/components/NavBar';
-import { doc, setDoc, getDocs, collection } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebaseConfig';
-import { arrayUnion } from 'firebase/firestore';
+import { auth } from '@/lib/firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import React from 'react';
+import ShelfButtons from '@/components/ShelfButtons';
+import useShelfFunctions from '@/hooks/useShelfFunctions';
 
 const SearchPage = () => {
+  const { fetchUserShelves } = useShelfFunctions();
   const router = useRouter();
   const { searchType, searchTerm } = router.query;
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [shelves, setShelves] = useState<{ [key: string]: any[] }>({});
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -31,22 +31,22 @@ const SearchPage = () => {
     return () => unsubscribe();
   }, []);
 
-  const fetchUserShelves = async (userId: string) => {
-    try {
-      const shelvesRef = collection(db, 'users', userId, 'shelves');
-      const shelvesSnap = await getDocs(shelvesRef);
-      const shelfBooks: { [key: string]: any[] } = {};
+  // const fetchUserShelves = async (userId: string) => {
+  //   try {
+  //     const shelvesRef = collection(db, 'users', userId, 'shelves');
+  //     const shelvesSnap = await getDocs(shelvesRef);
+  //     const shelfBooks: { [key: string]: any[] } = {};
 
-      for (const shelf of shelvesSnap.docs) {
-        const shelfData = shelf.data();
-        shelfBooks[shelf.id] = shelfData.books || [];
-      }
+  //     for (const shelf of shelvesSnap.docs) {
+  //       const shelfData = shelf.data();
+  //       shelfBooks[shelf.id] = shelfData.books || [];
+  //     }
 
-      setShelves(shelfBooks);
-    } catch (error) {
-      console.error('Error fetching user shelves:', error);
-    }
-  };
+  //     setShelves(shelfBooks);
+  //   } catch (error) {
+  //     console.error('Error fetching user shelves:', error);
+  //   }
+  // };
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -74,49 +74,49 @@ const SearchPage = () => {
     fetchBooks();
   }, [searchType, searchTerm, user]);
 
-  const handleAddToShelf = async (book: any, shelf: string) => {
-    if (!user) {
-      console.error('No user is logged in');
-      return;
-    }
+  // const handleAddToShelf = async (book: any, shelf: string) => {
+  //   if (!user) {
+  //     console.error('No user is logged in');
+  //     return;
+  //   }
 
-    try {
-      const userId = user.uid;
-      const bookData = {
-        id: book.id,
-        isbn:
-          book.volumeInfo.industryIdentifiers?.find(
-            (identifier: { type: string }) => identifier.type === 'ISBN_13'
-          )?.identifier || '',
-        title: book.volumeInfo.title,
-        authors: book.volumeInfo.authors,
-        image: book.volumeInfo.imageLinks?.thumbnail,
-        publishedDate: book.volumeInfo.publishedDate,
-        pagesTotal: book.volumeInfo.pageCount,
-        pagesRead: 0,
-        rating: 0,
-        addedDate: new Date().toISOString(),
-        startReading: null,
-        readDate: null,
-        review: '',
-      };
+  //   try {
+  //     const userId = user.uid;
+  //     const bookData = {
+  //       id: book.id,
+  //       isbn:
+  //         book.volumeInfo.industryIdentifiers?.find(
+  //           (identifier: { type: string }) => identifier.type === 'ISBN_13'
+  //         )?.identifier || '',
+  //       title: book.volumeInfo.title,
+  //       authors: book.volumeInfo.authors,
+  //       image: book.volumeInfo.imageLinks?.thumbnail,
+  //       publishedDate: book.volumeInfo.publishedDate,
+  //       pagesTotal: book.volumeInfo.pageCount,
+  //       pagesRead: 0,
+  //       rating: 0,
+  //       addedDate: new Date().toISOString(),
+  //       startReading: null,
+  //       readDate: null,
+  //       review: '',
+  //     };
 
-      const shelfRef = doc(db, 'users', userId, 'shelves', shelf);
+  //     const shelfRef = doc(db, 'users', userId, 'shelves', shelf);
 
-      await setDoc(
-        shelfRef,
-        {
-          books: arrayUnion(bookData),
-        },
-        { merge: true }
-      );
+  //     await setDoc(
+  //       shelfRef,
+  //       {
+  //         books: arrayUnion(bookData),
+  //       },
+  //       { merge: true }
+  //     );
 
-      console.log(`Added book ${book.title} to ${shelf} shelf successfully!`);
-      fetchUserShelves(userId);
-    } catch (error) {
-      console.error('Error adding book to shelf:', error);
-    }
-  };
+  //     console.log(`Added book ${book.title} to ${shelf} shelf successfully!`);
+  //     fetchUserShelves(userId);
+  //   } catch (error) {
+  //     console.error('Error adding book to shelf:', error);
+  //   }
+  // };
 
   return (
     <div className="flex flex-col min-h-screen bg-orange-700">
@@ -166,7 +166,7 @@ const SearchPage = () => {
                     </a>
                   </p>
                 </div>
-                <div className="flex flex-col ml-4">
+                {/* <div className="flex flex-col ml-4">
                   {shelves['Read'] &&
                   shelves['Read'].some((b) => b.id === book.id) ? (
                     <div>
@@ -234,7 +234,8 @@ const SearchPage = () => {
                       </button>
                     </>
                   )}
-                </div>
+                </div> */}
+                <ShelfButtons book={book} />
               </div>
             ))}
           </div>

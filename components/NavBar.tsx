@@ -95,34 +95,34 @@ const NavBar = () => {
         </button>
       </div>
       <ul className="flex items-center">
-        <li className="hover:bg-orange-200 px-9 py-3">
+        <li className="hover:bg-orange-200 px-5 py-3">
           <Link href="/home" className="hover:text-white">
             Home
           </Link>
         </li>
-        <li className="hover:bg-orange-200 px-9 py-3">
+        <li className="hover:bg-orange-200 px-5 py-3">
           <p>Feed</p>
         </li>
-        <li className="hover:bg-orange-200 px-9 py-3">
+        <li className="hover:bg-orange-200 px-5 py-3">
           <Link href="/shelves/Read" className="hover:text-white">
             Shelves
           </Link>
         </li>
-        <li className="relative hover:bg-orange-200 ">
+        <li className="relative hover:bg-orange-200">
           <p
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={`cursor-pointer px-9 py-3 ${dropdownOpen ? 'bg-orange-300' : ''}`}
+            className={`cursor-pointer px-5 py-3 ${dropdownOpen ? 'bg-orange-300' : ''}`}
           >
             Browse
           </p>
           {dropdownOpen && (
-            <ul className="absolute bg-white shadow-lg z-10">
+            <ul className="absolute bg-white shadow-lg z-10 -left-14">
               {genres.map((genre) => (
                 <li
                   key={genre.subject}
                   onClick={() => handleGenreSelect(genre.subject)}
                 >
-                  <p className="text-brown-100 p-2 cursor-pointer hover:bg-orange-300 hover:text-white whitespace-nowrap">
+                  <p className="text-brown-100 px-5 py-2 cursor-pointer hover:bg-orange-300 hover:text-white whitespace-nowrap">
                     {genre.name}
                   </p>
                 </li>
@@ -131,7 +131,7 @@ const NavBar = () => {
           )}
         </li>
         <li>
-          <p onClick={handleLogout} className="cursor-pointer px-9 py-3">
+          <p onClick={handleLogout} className="cursor-pointer px-5 py-3">
             Logout
           </p>
         </li>
