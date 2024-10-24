@@ -1,21 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { onAuthStateChanged } from 'firebase/auth';
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  collection,
-  getDocs,
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../../lib/firebaseConfig';
 import NavBar from '@/components/NavBar';
 import { ShelvesMenu } from '@/modules/shelves';
 import createShelvesForUser from '@/hooks/createShelvesForUser';
 
 const Shelves: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
-  const [shelves, setShelves] = useState<any>({
+  const [, setUser] = useState<any>(null);
+  const [, setShelves] = useState<any>({
     read: [],
     currentlyReading: [],
     toRead: [],

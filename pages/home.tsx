@@ -123,7 +123,9 @@ const Home: React.FC = () => {
     pagesRead: number,
     totalPages: number
   ) => {
-    if (totalPages === 0) return 0;
+    console.log(pagesRead);
+    console.log(totalPages);
+    if (totalPages === 0 || pagesRead === 0) return 100;
     return Math.max(0, ((totalPages - pagesRead) / totalPages) * 100);
   };
 
@@ -143,37 +145,49 @@ const Home: React.FC = () => {
 
         <div className="flex flex-col items-center bg-orange-400 p-8 mt-8 gap-3">
           <p className="text-xl font-bold mb-4">You are currently reading:</p>
-          <div className="flex gap-12">
+          <Swiper
+            spaceBetween={10}
+            slidesPerView={3.6}
+            loop={false}
+            grabCursor={true}
+            className="w-full"
+          >
             {currentlyReadingBooks.map((book) => {
               const remainingPercentage = calculateRemainingPercentage(
                 book.pagesRead,
                 book.pagesTotal
               );
+              console.log(book);
               return (
-                <div key={book.id} className="flex gap-6">
-                  <div className="w-32 h-44 bg-orange-100 shadow-3xl">
-                    <img
-                      src={book.image}
-                      alt={book.title}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-between py-5">
-                    <p className="text-brown-200 text-lg font-extrabold w-4/5">
-                      {book.title}
-                    </p>
-                    <p>Progress: {remainingPercentage.toFixed(0)}% left</p>
+                <SwiperSlide key={book.id}>
+                  <div className="flex gap-6">
                     <a
-                      href="/shelves/Currently%20Reading"
-                      className="text-orange-200 hover:underline"
+                      href={`/book/${book.id}`}
+                      className="w-32 h-44 bg-orange-100 shadow-3xl"
                     >
-                      Update progress
+                      <img
+                        src={book.image}
+                        alt={book.title}
+                        className="object-cover w-full h-full"
+                      />
                     </a>
+                    <div className="flex flex-col justify-between py-5">
+                      <p className="text-brown-200 text-lg font-extrabold w-4/5">
+                        {book.title}
+                      </p>
+                      <p>Progress: {remainingPercentage.toFixed(0)}% left</p>
+                      <a
+                        href="/shelves/Currently%20Reading"
+                        className="text-orange-200 hover:underline"
+                      >
+                        Update progress
+                      </a>
+                    </div>
                   </div>
-                </div>
+                </SwiperSlide>
               );
             })}
-          </div>
+          </Swiper>
         </div>
 
         <div className="">
@@ -202,8 +216,9 @@ const Home: React.FC = () => {
                       {list.books.slice(0, 5).map((book: Book) => (
                         <SwiperSlide key={book.primary_isbn13}>
                           <div className="flex gap-12 bg-orange-400 p-10 w-fit ">
-                            <div
-                              className="w-56 h-72 bg-orange-100 shadow-brown-300 shadow-3xl"
+                            <a
+                              href={`/book/${book.primary_isbn13}`}
+                              className="w-56 h-80 bg-orange-100 shadow-brown-300 shadow-3xl"
                               style={{
                                 backgroundImage: `url(${book.book_image})`,
                                 backgroundSize: 'cover',
@@ -215,7 +230,7 @@ const Home: React.FC = () => {
                                   No Image Available
                                 </p>
                               )}
-                            </div>
+                            </a>
                             <div className="flex flex-col justify-between py-3">
                               <div>
                                 <p className="font-bold">
@@ -238,7 +253,8 @@ const Home: React.FC = () => {
 
                   {list.listType === 'combined-print-and-e-book-fiction' &&
                     list.books.slice(0, 7).map((book: Book) => (
-                      <div
+                      <a
+                        href={`/book/${book.primary_isbn13}`}
                         className="flex flex-col text-center gap-2"
                         key={book.primary_isbn13}
                       >
@@ -262,14 +278,15 @@ const Home: React.FC = () => {
                         <p className="text-brown-200 font-thin">
                           {book.author || 'No Author Available'}
                         </p>
-                      </div>
+                      </a>
                     ))}
 
                   {list.listType === 'young-adult-hardcover' && (
-                    <div className="bg-orange-300 flex w-full gap-4 p-10 items-center">
+                    <div className="bg-orange-300 flex w-full gap-4 p-10 items-start">
                       {list.listType === 'young-adult-hardcover' &&
                         list.books.slice(0, 5).map((book: Book) => (
-                          <div
+                          <a
+                            href={`/book/${book.primary_isbn13}`}
                             className="flex flex-col items-center text-center gap-2 w-1/4"
                             key={book.primary_isbn13}
                           >
@@ -277,20 +294,20 @@ const Home: React.FC = () => {
                               <img
                                 src={book.book_image}
                                 alt={book.title}
-                                className="w-44 h-56 bg-orange-100 shadow-3xl mb-4"
+                                className="w-36 h-52 bg-orange-100 shadow-3xl mb-4"
                               />
                             ) : (
-                              <div className="w-44 h-56 bg-gray-200 shadow-3xl mb-4 flex items-center justify-center">
+                              <div className="w-36 h-52 object-cover bg-gray-200 shadow-3xl mb-4 flex items-center justify-center">
                                 <p>No Image Available</p>
                               </div>
                             )}
-                            <p className="text-brown-200 font-thin">
+                            <p className="text-brown-200 font-bold text-lg">
                               {book.title || 'No Title Available'}
                             </p>
                             <p className="text-brown-200 font-thin">
                               {book.author || 'No Author Available'}
                             </p>
-                          </div>
+                          </a>
                         ))}
 
                       <img
@@ -303,7 +320,8 @@ const Home: React.FC = () => {
 
                   {list.listType === 'trade-fiction-paperback' &&
                     list.books.slice(1, 7).map((book: Book) => (
-                      <div
+                      <a
+                        href={`/book/${book.primary_isbn13}`}
                         className="flex flex-col items-center text-center gap-2 w-1/4"
                         key={book.primary_isbn13}
                       >
@@ -311,7 +329,7 @@ const Home: React.FC = () => {
                           <img
                             src={book.book_image}
                             alt={book.title}
-                            className="w-44 h-56 bg-orange-100 shadow-3xl mb-4"
+                            className="w-44 h-64 object-cover bg-orange-100 shadow-3xl mb-4"
                           />
                         ) : (
                           <div className="w-44 h-56 bg-gray-200 shadow-3xl mb-4 flex items-center justify-center">
@@ -324,7 +342,7 @@ const Home: React.FC = () => {
                         <p className="text-brown-200 font-thin">
                           {book.author || 'No Author Available'}
                         </p>
-                      </div>
+                      </a>
                     ))}
                 </div>
               </div>

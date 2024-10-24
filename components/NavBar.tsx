@@ -30,7 +30,7 @@ const NavBar = () => {
   };
 
   return (
-    <nav className="flex justify-between items-center py-4 px-10 bg-orange-100 text-white">
+    <nav className="flex justify-between items-center py-4 px-10 bg-orange-200 text-white">
       <div className="flex items-center">
         <img src="logo.png" alt="Logo" className="h-10  w-auto" />
       </div>
@@ -70,7 +70,7 @@ const NavBar = () => {
           <p>Feed</p>
         </li>
         <li className="hover:bg-orange-200">
-          <Link href="/shelves" className="hover:text-white">
+          <Link href="/shelves/Read" className="hover:text-white">
             Shelves
           </Link>
         </li>

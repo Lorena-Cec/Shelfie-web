@@ -84,11 +84,16 @@ const SearchPage = () => {
       const userId = user.uid;
       const bookData = {
         id: book.id,
+        isbn:
+          book.volumeInfo.industryIdentifiers?.find(
+            (identifier: { type: string }) => identifier.type === 'ISBN_13'
+          )?.identifier || '',
         title: book.volumeInfo.title,
         authors: book.volumeInfo.authors,
         image: book.volumeInfo.imageLinks?.thumbnail,
         publishedDate: book.volumeInfo.publishedDate,
         pagesTotal: book.volumeInfo.pageCount,
+        pagesRead: 0,
         rating: 0,
         addedDate: new Date().toISOString(),
         startReading: null,
@@ -131,15 +136,15 @@ const SearchPage = () => {
                 key={book.id}
                 className="grid grid-cols-6 gap-4 place-items-start px-16 py-8 bg-orange-600"
               >
-                <div className="flex-shrink-0">
+                <a href={`/book/${book.isbn}`} className="flex-shrink-0">
                   <img
                     src={book.volumeInfo.imageLinks?.thumbnail}
                     alt={book.volumeInfo.title}
                     className="w-36 h-52 mr-4"
                   />
-                </div>
+                </a>
                 <div className="col-span-4 flex flex-col justify-between h-full">
-                  <div>
+                  <a href={`/book/${book.isbn}`}>
                     <h2 className="text-xl font-bold text-brown-100">
                       {book.volumeInfo.title}
                     </h2>
@@ -150,11 +155,11 @@ const SearchPage = () => {
                     <p className="text-brown-300">
                       Published: {book.volumeInfo.publishedDate || 'N/A'}
                     </p>
-                  </div>
+                  </a>
                   <p className="text-brown-200 text-lg mb-4">
                     {book.volumeInfo.description?.slice(0, 100)}...{' '}
                     <a
-                      href="/bookInfo"
+                      href={`/book/${book.isbn}`}
                       className="text-brown-300 hover:text-brown-100"
                     >
                       Find out more
@@ -169,7 +174,7 @@ const SearchPage = () => {
                         This book is on your Shelf.
                       </p>
                       <button
-                        onClick={() => router.push('/shelves')}
+                        onClick={() => router.push('/shelves/Read')}
                         className="bg-orange-200 hover:bg-orange-300 text-brown-700 px-4 py-2 rounded-md"
                       >
                         View Read Shelf
@@ -184,7 +189,9 @@ const SearchPage = () => {
                         You have this book on your Shelf.
                       </p>
                       <button
-                        onClick={() => router.push('/shelves')}
+                        onClick={() =>
+                          router.push('/shelves/Currently%20Reading')
+                        }
                         className="bg-orange-200 hover:bg-orange-300 text-brown-700 px-4 py-2 rounded-md"
                       >
                         View Currently Reading Shelf
@@ -197,7 +204,7 @@ const SearchPage = () => {
                         You have this book on your Shelf.
                       </p>
                       <button
-                        onClick={() => router.push('/shelves')}
+                        onClick={() => router.push('/shelves/To%20Read')}
                         className="bg-orange-200 hover:bg-orange-300 text-brown-700 px-4 py-2 rounded-md"
                       >
                         View To Read Shelf
