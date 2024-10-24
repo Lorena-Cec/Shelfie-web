@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../../lib/firebaseConfig';
 import NavBar from '@/components/NavBar';
-import { ShelvesMenu } from '@/modules/shelves';
+import { ShelvesMenu } from '@/modules/books';
 import createShelvesForUser from '@/hooks/createShelvesForUser';
 
 const Shelves: React.FC = () => {

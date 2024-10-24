@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import useShelfFunctions from '@/hooks/useShelfFunctions';
+import useShelfFunctions from '@/modules/books/hooks/useShelfFunctions';
 
 interface Book {
   id: string;

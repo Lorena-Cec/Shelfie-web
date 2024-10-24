@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import React from 'react';
 import NavBar from '@/components/NavBar';
-import ShelfButtons from '@/components/ShelfButtons';
+import ShelfButtons from '@/modules/books/components/ShelfButtons';
 
 interface Book {
   id: string;

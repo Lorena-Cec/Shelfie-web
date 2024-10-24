@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import React from 'react';
-import ShelfButtons from '@/components/ShelfButtons';
+import ShelfButtons from '@/modules/books/components/ShelfButtons';
 import NavBar from '@/components/NavBar';
 
 interface IndustryIdentifier {

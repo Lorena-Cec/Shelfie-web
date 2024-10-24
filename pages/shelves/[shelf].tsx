@@ -1,4 +1,4 @@
-import ShelfScreen from '@/modules/shelves/screens/ShelfScreen';
+import ShelfScreen from '@/modules/books/screens/ShelfScreen';
 import React from 'react';
 
 const ShelfPage = () => {
