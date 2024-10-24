@@ -136,7 +136,7 @@ const SearchPage = () => {
                 key={book.id}
                 className="grid grid-cols-6 gap-4 place-items-start px-16 py-8 bg-orange-600"
               >
-                <a href={`/book/${book.isbn}`} className="flex-shrink-0">
+                <a href={`/googleBooks/${book.id}`} className="flex-shrink-0">
                   <img
                     src={book.volumeInfo.imageLinks?.thumbnail}
                     alt={book.volumeInfo.title}
@@ -144,7 +144,7 @@ const SearchPage = () => {
                   />
                 </a>
                 <div className="col-span-4 flex flex-col justify-between h-full">
-                  <a href={`/book/${book.isbn}`}>
+                  <a href={`/googleBooks/${book.id}`}>
                     <h2 className="text-xl font-bold text-brown-100">
                       {book.volumeInfo.title}
                     </h2>
@@ -159,7 +159,7 @@ const SearchPage = () => {
                   <p className="text-brown-200 text-lg mb-4">
                     {book.volumeInfo.description?.slice(0, 100)}...{' '}
                     <a
-                      href={`/book/${book.isbn}`}
+                      href={`/googleBooks/${book.id}`}
                       className="text-brown-300 hover:text-brown-100"
                     >
                       Find out more

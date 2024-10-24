@@ -162,7 +162,7 @@ const Home: React.FC = () => {
                 <SwiperSlide key={book.id}>
                   <div className="flex gap-6">
                     <a
-                      href={`/book/${book.id}`}
+                      href={`/googleBooks/${book.id}`}
                       className="w-32 h-44 bg-orange-100 shadow-3xl"
                     >
                       <img

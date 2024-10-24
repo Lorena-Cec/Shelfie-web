@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { auth } from '@/lib/firebaseConfig';
 import { setUser } from '@/modules/authenticaton/state/authSlice';
@@ -10,6 +10,23 @@ const NavBar = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchType, setSearchType] = useState<string>('subject');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLUListElement | null>(null);
+
+  const genres = [
+    { name: 'Fiction', subject: 'fiction' },
+    { name: 'Non-Fiction', subject: 'non-fiction' },
+    { name: 'Science Fiction', subject: 'science fiction' },
+    { name: 'Fantasy', subject: 'fantasy' },
+    { name: 'Mystery', subject: 'mystery' },
+    { name: 'Romance', subject: 'romance' },
+    { name: 'Biography', subject: 'biography' },
+  ];
+
+  const handleGenreSelect = (subject: string) => {
+    router.push(`/search?searchType=subject&searchTerm=${subject}`);
+    setDropdownOpen(false);
+  };
 
   const handleLogout = async () => {
     try {
@@ -28,6 +45,23 @@ const NavBar = () => {
       query: { searchType, searchTerm },
     });
   };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      setDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="flex justify-between items-center py-4 px-10 bg-orange-200 text-white">
@@ -60,25 +94,44 @@ const NavBar = () => {
           Search
         </button>
       </div>
-      <ul className="flex items-center gap-4">
-        <li className="hover:bg-orange-200">
+      <ul className="flex items-center">
+        <li className="hover:bg-orange-200 px-9 py-3">
           <Link href="/home" className="hover:text-white">
             Home
           </Link>
         </li>
-        <li className="hover:bg-orange-200">
+        <li className="hover:bg-orange-200 px-9 py-3">
           <p>Feed</p>
         </li>
-        <li className="hover:bg-orange-200">
+        <li className="hover:bg-orange-200 px-9 py-3">
           <Link href="/shelves/Read" className="hover:text-white">
             Shelves
           </Link>
         </li>
-        <li className="hover:bg-orange-200">
-          <p>Browse</p>
+        <li className="relative hover:bg-orange-200 ">
+          <p
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className={`cursor-pointer px-9 py-3 ${dropdownOpen ? 'bg-orange-300' : ''}`}
+          >
+            Browse
+          </p>
+          {dropdownOpen && (
+            <ul className="absolute bg-white shadow-lg z-10">
+              {genres.map((genre) => (
+                <li
+                  key={genre.subject}
+                  onClick={() => handleGenreSelect(genre.subject)}
+                >
+                  <p className="text-brown-100 p-2 cursor-pointer hover:bg-orange-300 hover:text-white whitespace-nowrap">
+                    {genre.name}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
         </li>
         <li>
-          <p onClick={handleLogout} className="cursor-pointer">
+          <p onClick={handleLogout} className="cursor-pointer px-9 py-3">
             Logout
           </p>
         </li>

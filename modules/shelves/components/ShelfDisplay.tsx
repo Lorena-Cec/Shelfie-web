@@ -50,11 +50,14 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
               key={book.id}
               className={`grid ${shelfName === 'To Read' ? 'grid-cols-6' : shelfName === 'Currently Reading' ? 'grid-cols-8' : 'grid-cols-7'} gap-4 place-items-center px-16 py-8 bg-orange-600 text-brown-100`}
             >
-              <img
-                src={book.image}
-                alt={book.title}
-                className="w-36 h-52 shadow-3xl "
-              />
+              <a href={`/googleBooks/${book.id}`}>
+                <img
+                  src={book.image}
+                  alt={book.title}
+                  className="w-36 h-52 shadow-3xl "
+                />
+              </a>
+
               <div>
                 <p className="text-xl font-bold">{book.title}</p>
                 <p>{book.authors?.join(', ')}</p>
