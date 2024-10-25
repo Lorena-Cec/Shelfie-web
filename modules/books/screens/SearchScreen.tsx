@@ -9,6 +9,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import React from 'react';
 import ShelfButtons from '@/modules/books/components/ShelfButtons';
 import useShelfFunctions from '@/modules/books/hooks/useShelfFunctions';
+import Footer from '@/components/Footer';
 
 const SearchPage = () => {
   const { fetchUserShelves } = useShelfFunctions();
@@ -111,6 +112,7 @@ const SearchPage = () => {
           </div>
         )}
       </div>
+      <Footer></Footer>
     </div>
   );
 };

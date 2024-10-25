@@ -64,9 +64,9 @@ const NavBar = () => {
   }, []);
 
   return (
-    <nav className="flex justify-between items-center py-4 px-10 bg-orange-200 text-white">
+    <nav className="flex justify-between items-center py-4 px-10 bg-orange-300 text-white">
       <div className="flex items-center">
-        <img src="logo.png" alt="Logo" className="h-10  w-auto" />
+        <img src="logowhite.png" alt="Logo" className="h-10  w-auto" />
       </div>
       <div className="flex justify-center items-center gap-4">
         <select

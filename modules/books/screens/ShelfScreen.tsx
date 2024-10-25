@@ -7,6 +7,7 @@ import { auth, db } from '../../../lib/firebaseConfig';
 import NavBar from '@/components/NavBar';
 import { ShelvesMenu } from '@/modules/books';
 import createShelvesForUser from '@/hooks/createShelvesForUser';
+import Footer from '@/components/Footer';
 
 const Shelves: React.FC = () => {
   const [, setUser] = useState<any>(null);
@@ -49,7 +50,7 @@ const Shelves: React.FC = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="flex flex-col min-h-screen bg-orange-700">
+    <div className="flex flex-col min-h-screen bg-brown-700">
       <NavBar></NavBar>
       <div className="flex flex-col items-center">
         <h1 className="text-4xl font-bold mt-24 text-brown-100">
@@ -61,6 +62,7 @@ const Shelves: React.FC = () => {
 
         <ShelvesMenu></ShelvesMenu>
       </div>
+      <Footer></Footer>
     </div>
   );
 };

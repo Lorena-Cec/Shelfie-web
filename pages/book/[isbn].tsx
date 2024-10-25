@@ -194,7 +194,7 @@ const BookDetails = () => {
 
       {/* Similar Books Section */}
       <div className="mt-20 px-32 text-brown-100 pb-32">
-        <h2 className="text-2xl font-bold mb-4">Similar Books</h2>
+        <h2 className="text-2xl font-bold mb-4">Books in the same Genre</h2>
         <div className="flex justify-between">
           {relatedBooks.slice(0, 8).map((similarBook) => (
             <a
