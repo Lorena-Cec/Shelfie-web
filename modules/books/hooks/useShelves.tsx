@@ -184,6 +184,57 @@ const useShelves = () => {
     }
   };
 
+  const handleSetBooks = async (
+    bookId: string,
+    updates: Record<string, any>
+  ) => {
+    try {
+      if (!userId) return;
+
+      setBooks((prevBooks) =>
+        prevBooks.map((book) =>
+          book.id === bookId ? { ...book, ...updates } : book
+        )
+      );
+    } catch (error) {
+      console.error('Error updating book:', error);
+    }
+  };
+
+  const handleUpdatesBook = async (
+    bookId: string,
+    updates: Record<string, any>
+  ) => {
+    try {
+      if (!userId) return;
+
+      const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
+      const shelfSnap = await getDoc(shelfRef);
+
+      if (shelfSnap.exists()) {
+        const books = shelfSnap.data().books || [];
+        const updatedBooks = books.map((book: any) =>
+          book.id === bookId ? { ...book, ...updates } : book
+        );
+
+        await setDoc(shelfRef, { books: updatedBooks }, { merge: true });
+
+        if (updates.startReading && selectedShelf === 'To Read') {
+          await moveBookToShelf(bookId, 'Currently Reading', updatedBooks);
+          toast.success('Book moved to Currently Reading shelf');
+        } else if (
+          updates.readDate &&
+          (selectedShelf === 'To Read' || selectedShelf === 'Currently Reading')
+        ) {
+          await moveBookToShelf(bookId, 'Read', updatedBooks);
+          toast.success('Book moved to Read shelf');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating book:', error);
+    }
+  };
+
   return {
     selectedShelf,
     setSelectedShelf: handleShelfSelect,
@@ -191,8 +242,10 @@ const useShelves = () => {
     handleDeleteBook,
     handleMoveBook,
     handleUpdateBook,
+    handleUpdatesBook,
     hoveredRatings,
     setHoveredRatings,
+    handleSetBooks,
   };
 };
 

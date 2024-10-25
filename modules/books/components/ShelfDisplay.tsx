@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Book } from '../models/Book';
+import BookActions from './BookActionsButtons';
+import { Timestamp } from 'firebase/firestore';
 
 interface ShelfDisplayProps {
   shelfName: string;
@@ -18,9 +20,14 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
   hoveredRatings = {},
   setHoveredRatings,
   handleUpdateBook,
-  handleDeleteBook,
   handleMoveBook,
 }) => {
+  const formatDate = (date: any) => {
+    // Check if the date is an instance of Timestamp and convert it to a date string
+    return date instanceof Timestamp
+      ? date.toDate().toLocaleDateString()
+      : 'N/A'; // Fallback for non-timestamp values
+  };
   return (
     <div className="text-center mt-8 w-full ">
       {books.length === 0 ? (
@@ -44,12 +51,14 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
             <p>READ DATE</p>
             <div></div>
           </div>
+
           <div className="mb-2 flex flex-col gap-2">
             {books.map((book) => (
               <div
                 key={book.id}
                 className={`grid ${shelfName === 'To Read' ? 'grid-cols-6' : shelfName === 'Currently Reading' ? 'grid-cols-8' : 'grid-cols-7'} gap-4 place-items-center px-16 py-8 bg-orange-600 text-brown-100`}
               >
+                {/* COVER */}
                 <a href={`/googleBooks/${book.id}`}>
                   <img
                     src={book.image}
@@ -58,6 +67,7 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                   />
                 </a>
 
+                {/* Title and Authors */}
                 <div>
                   <p className="text-xl font-bold">{book.title}</p>
                   <p>{book.authors?.join(', ')}</p>
@@ -156,58 +166,13 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                 </p>
 
                 {/* START OF READING */}
-                <input
-                  type="date"
-                  value={
-                    book.startReading
-                      ? new Date(book.startReading)
-                          .toISOString()
-                          .substring(0, 10)
-                      : ''
-                  }
-                  onChange={(e) =>
-                    handleUpdateBook(book.id, 'startReading', e.target.value)
-                  }
-                  className="p-1 border rounded"
-                />
+                <p className="text-lg">{formatDate(book.startReading)}</p>
 
                 {/* READ DATE */}
-                <input
-                  type="date"
-                  value={
-                    book.readDate
-                      ? new Date(book.readDate).toISOString().substring(0, 10)
-                      : ''
-                  }
-                  onChange={(e) =>
-                    handleUpdateBook(book.id, 'readDate', e.target.value)
-                  }
-                  className="p-1 border rounded"
-                />
-                {/* DELETE & MOVE ACTIONS */}
-                <div className="flex flex-col items-center gap-2">
-                  {/* Delete Button */}
-                  <button
-                    className="bg-orange-200 hover:bg-orange-300 text-brown-700 px-4 py-2 rounded-md mb-2 w-full"
-                    onClick={() => handleDeleteBook(book.id)}
-                  >
-                    Delete
-                  </button>
+                <p className="text-lg">{formatDate(book.readDate)}</p>
 
-                  {/* Move to Shelf Dropdown */}
-                  <select
-                    className="px-4 py-2 rounded"
-                    value=""
-                    onChange={(e) => handleMoveBook(book.id, e.target.value)}
-                  >
-                    <option value="" disabled>
-                      Move to...
-                    </option>
-                    <option value="Read">Read</option>
-                    <option value="Currently Reading">Currently Reading</option>
-                    <option value="To Read">To Read</option>
-                  </select>
-                </div>
+                {/* EDIT, DELETE & MOVE ACTIONS */}
+                <BookActions book={book}></BookActions>
               </div>
             ))}
           </div>

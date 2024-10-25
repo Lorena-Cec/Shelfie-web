@@ -220,12 +220,12 @@ const Home: React.FC = () => {
                         grabCursor={true}
                         loop={true}
                       >
-                        {list.books.slice(0, 5).map((book: Book) => (
+                        {list.books.slice(0, 7).map((book: Book) => (
                           <SwiperSlide key={book.primary_isbn13}>
-                            <div className="flex gap-12 bg-orange-400 p-10 w-fit ">
+                            <div className="flex gap-12 bg-orange-300 p-10 w-fit ">
                               <a
                                 href={`/book/${book.primary_isbn13}`}
-                                className="w-56 h-80 bg-orange-100 shadow-brown-300 shadow-3xl"
+                                className="w-56 h-80 shadow-brown-300 shadow-3xl"
                                 style={{
                                   backgroundImage: `url(${book.book_image})`,
                                   backgroundSize: 'cover',
@@ -240,18 +240,23 @@ const Home: React.FC = () => {
                               </a>
                               <div className="flex flex-col justify-between py-3">
                                 <div>
-                                  <p className="font-bold">
+                                  <p className="font-bold text-xl">
                                     {book.title || 'No Title Available'}
                                   </p>
-                                  <p>{book.author || 'No Author Available'}</p>
+                                  <p className="font-semibold">
+                                    {book.author || 'No Author Available'}
+                                  </p>
                                 </div>
                                 <p className="w-80">
                                   {book.description ||
                                     'No Description Available'}
                                 </p>
-                                <p className="text-blue-500 cursor-pointer">
+                                <a
+                                  href={`/book/${book.primary_isbn13}`}
+                                  className="text-orange-100 cursor-pointer"
+                                >
                                   Read more...
-                                </p>
+                                </a>
                               </div>
                             </div>
                           </SwiperSlide>

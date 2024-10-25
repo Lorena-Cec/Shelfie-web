@@ -71,6 +71,8 @@ const useShelfFunctions = () => {
         startReading: null,
         readDate: null,
         review: '',
+        rereadDates: null,
+        quotes: '',
       };
 
       const shelfRef = doc(db, 'users', userId, 'shelves', shelf);

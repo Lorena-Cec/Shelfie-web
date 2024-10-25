@@ -9,4 +9,7 @@ export interface Book {
   rating?: number;
   pagesRead: number;
   pagesTotal: number;
+  rereadDates: string[];
+  quotes: string[];
+  review: string;
 }
