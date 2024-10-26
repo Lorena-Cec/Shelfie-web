@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import React from 'react';
-import useShelves from '../hooks/useShelves';
-import { Book } from '../models/Book';
+import { useEffect, useState } from "react";
+import React from "react";
+import useShelves from "../hooks/useShelves";
+import { Book } from "../models/Book";
+import { Timestamp } from "firebase/firestore";
 
 interface BookActionsProps {
   book: Book;
@@ -9,40 +10,57 @@ interface BookActionsProps {
 
 const BookActions: React.FC<BookActionsProps> = ({ book }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [quotes, setQuotes] = useState(['']);
-  const { handleDeleteBook } = useShelves();
-  const { handleMoveBook } = useShelves();
+  const [quotes, setQuotes] = useState([""]);
   const {
     hoveredRatings,
     handleSetBooks,
     setHoveredRatings,
     handleUpdatesBook,
+    handleDeleteBook,
+    handleMoveBook,
     selectedShelf,
   } = useShelves();
-  const [reviewText, setReviewText] = useState(book.review || '');
+  const [reviewText, setReviewText] = useState(book.review || "");
   const [rating, setRating] = useState(0);
   const [startReadingDate, setStartReadingDate] = useState<Date | null>(null);
   const [readDate, setReadDate] = useState<Date | null>(null);
   const [rereadDates, setRereadDates] = useState<string[]>(
     book.rereadDates || []
   );
-  const [newRereadDate, setNewRereadDate] = useState<string>('');
+  const [newRereadDate, setNewRereadDate] = useState<string>("");
 
   useEffect(() => {
     if (book) {
-      setReviewText(book.review || '');
+      setReviewText(book.review || "");
       setRereadDates(book.rereadDates || []);
       setQuotes(book.quotes || []);
-      setReadDate(book.readDate ? new Date(book.readDate) : null);
       setRating(book.rating || 0);
-      setStartReadingDate(
-        book.startReading ? new Date(book.startReading) : null
-      );
+
+      if (
+        book.startReading &&
+        typeof book.startReading === "object" &&
+        "seconds" in book.startReading
+      ) {
+        setStartReadingDate((book.startReading as Timestamp).toDate());
+      } else if (typeof book.startReading === "string") {
+        setStartReadingDate(new Date(book.startReading));
+      } else {
+        setStartReadingDate(null);
+      }
+
+      if (
+        book.readDate &&
+        typeof book.readDate === "object" &&
+        "seconds" in book.readDate
+      ) {
+        setReadDate((book.readDate as Timestamp).toDate());
+      } else if (typeof book.readDate === "string") {
+        setReadDate(new Date(book.readDate));
+      } else {
+        setReadDate(null);
+      }
     }
   }, [book]);
-
-  console.log(readDate);
-  console.log(startReadingDate);
 
   const handleQuoteChange = (index: number, value: string) => {
     const updatedQuotes = [...quotes];
@@ -50,7 +68,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
     setQuotes(updatedQuotes);
   };
 
-  const addQuoteField = () => setQuotes([...quotes, '']);
+  const addQuoteField = () => setQuotes([...quotes, ""]);
 
   const removeQuoteField = (index: number) => {
     const updatedQuotes = quotes.filter((_, i) => i !== index);
@@ -74,10 +92,10 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
   const handleClose = () => {
     setIsModalOpen(false);
 
-    setReviewText('');
+    setReviewText("");
     setRereadDates([]);
     setQuotes([]);
-    setNewRereadDate('');
+    setNewRereadDate("");
     setHoveredRatings({});
   };
 
@@ -133,7 +151,6 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
             {/* My Rating */}
             <div className="flex flex-col items-center mb-4">
               <label className="block font-semibold mb-1">My Rating:</label>
-              {/* Replace with star-rating component */}
               <div className="flex space-x-1">
                 {Array.from({ length: 5 }, (_, index) => (
                   <img
@@ -223,7 +240,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
                   startReadingDate instanceof Date &&
                   !isNaN(startReadingDate.getTime())
                     ? startReadingDate.toISOString().substring(0, 10)
-                    : ''
+                    : ""
                 }
                 onChange={(e) => {
                   const newDate = e.target.value;
@@ -241,7 +258,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
                 value={
                   readDate instanceof Date && !isNaN(readDate.getTime())
                     ? readDate.toISOString().substring(0, 10)
-                    : ''
+                    : ""
                 }
                 onChange={(e) => setReadDate(new Date(e.target.value))}
               />
@@ -249,14 +266,14 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
 
             {/* Add Reread Date */}
             <button
-              onClick={() => setNewRereadDate(' ')}
+              onClick={() => setNewRereadDate(" ")}
               className="text-blue-500 hover:text-blue-700 mb-4"
             >
               + Add Reread Date
             </button>
 
             {/* Conditional input for new re-read date */}
-            {newRereadDate !== '' && (
+            {newRereadDate !== "" && (
               <div className="flex items-center gap-2 mb-4">
                 <input
                   type="date"
@@ -268,7 +285,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
                   onClick={() => {
                     const updatedDates = [...rereadDates, newRereadDate];
                     setRereadDates(updatedDates);
-                    setNewRereadDate('');
+                    setNewRereadDate("");
                   }}
                   className="bg-orange-300 text-white px-4 py-1 rounded-md"
                 >

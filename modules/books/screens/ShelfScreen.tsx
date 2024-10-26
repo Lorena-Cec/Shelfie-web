@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../../../lib/firebaseConfig';
-import NavBar from '@/components/NavBar';
-import { ShelvesMenu } from '@/modules/books';
-import createShelvesForUser from '@/hooks/createShelvesForUser';
-import Footer from '@/components/Footer';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../../lib/firebaseConfig";
+import NavBar from "@/components/NavBar";
+import { ShelvesMenu } from "@/modules/books";
+import createShelvesForUser from "@/hooks/createShelvesForUser";
+import Footer from "@/components/Footer";
 
 const Shelves: React.FC = () => {
   const [, setUser] = useState<any>(null);
@@ -26,14 +26,14 @@ const Shelves: React.FC = () => {
         createShelvesForUser(user.uid);
         fetchShelves(user.uid);
       } else {
-        router.push('/register');
+        router.push("/register");
       }
     });
     return () => unsubscribe();
   }, []);
 
   const fetchShelves = async (userId: string) => {
-    const userDocRef = doc(db, 'users', userId);
+    const userDocRef = doc(db, "users", userId);
     const userDoc = await getDoc(userDocRef);
     if (userDoc.exists()) {
       setShelves(

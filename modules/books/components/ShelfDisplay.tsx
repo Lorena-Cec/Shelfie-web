@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
-import { Book } from '../models/Book';
-import BookActions from './BookActionsButtons';
-import { Timestamp } from 'firebase/firestore';
+import React from "react";
+import { Book } from "../models/Book";
+import BookActions from "./BookActionsButtons";
+import { Timestamp } from "firebase/firestore";
 
 interface ShelfDisplayProps {
   shelfName: string;
   books: Book[];
   hoveredRatings?: { [key: string]: number | null };
+  setBooks: (prev: any) => void;
   setHoveredRatings: (prev: any) => void;
+  fetchBooks: () => Promise<void>;
   handleUpdateBook: (id: string, field: string, value: any) => void;
   handleDeleteBook: (id: string) => void;
   handleMoveBook: (id: string, newShelf: string) => void;
@@ -16,23 +18,23 @@ interface ShelfDisplayProps {
 
 const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
   shelfName,
-  books,
+  books = [],
   hoveredRatings = {},
   setHoveredRatings,
   handleUpdateBook,
   handleMoveBook,
 }) => {
   const formatDate = (date: any) => {
-    // Check if the date is an instance of Timestamp and convert it to a date string
     return date instanceof Timestamp
       ? date.toDate().toLocaleDateString()
-      : 'N/A'; // Fallback for non-timestamp values
+      : "N/A";
   };
+
   return (
     <div className="text-center mt-8 w-full ">
       {books.length === 0 ? (
         <p className="text-sm mt-4">
-          Add books to {shelfName} -{' '}
+          Add books to {shelfName} -{" "}
           <a href="/browse" className="text-blue-500">
             Browse here
           </a>
@@ -40,12 +42,12 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
       ) : (
         <div className="flex flex-col gap-2 mt-4">
           <div
-            className={`grid ${shelfName === 'To Read' ? 'grid-cols-6' : shelfName === 'Currently Reading' ? 'grid-cols-8' : 'grid-cols-7'} gap-4 px-16 py-4 font-bold bg-orange-300 text-brown-700`}
+            className={`grid ${shelfName === "To Read" ? "grid-cols-6" : shelfName === "Currently Reading" ? "grid-cols-8" : "grid-cols-7"} gap-4 px-16 py-4 font-bold bg-orange-300 text-brown-700`}
           >
             <div></div>
             <p>TITLE & AUTHOR</p>
-            {shelfName !== 'To Read' && <p>RATING</p>}
-            {shelfName == 'Currently Reading' && <p>PROGRESS</p>}
+            {shelfName !== "To Read" && <p>RATING</p>}
+            {shelfName == "Currently Reading" && <p>PROGRESS</p>}
             <p>ADDED DATE</p>
             <p>START OF READING</p>
             <p>READ DATE</p>
@@ -56,7 +58,7 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
             {books.map((book) => (
               <div
                 key={book.id}
-                className={`grid ${shelfName === 'To Read' ? 'grid-cols-6' : shelfName === 'Currently Reading' ? 'grid-cols-8' : 'grid-cols-7'} gap-4 place-items-center px-16 py-8 bg-orange-600 text-brown-100`}
+                className={`grid ${shelfName === "To Read" ? "grid-cols-6" : shelfName === "Currently Reading" ? "grid-cols-8" : "grid-cols-7"} gap-4 place-items-center px-16 py-8 bg-orange-600 text-brown-100`}
               >
                 {/* COVER */}
                 <a href={`/googleBooks/${book.id}`}>
@@ -70,11 +72,11 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                 {/* Title and Authors */}
                 <div>
                   <p className="text-xl font-bold">{book.title}</p>
-                  <p>{book.authors?.join(', ')}</p>
+                  <p>{book.authors?.join(", ")}</p>
                 </div>
 
                 {/* RATING */}
-                {shelfName !== 'To Read' && (
+                {shelfName !== "To Read" && (
                   <div className="flex space-x-1">
                     {Array.from({ length: 5 }, (_, index) => (
                       <img
@@ -95,7 +97,7 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                           }))
                         }
                         onClick={() =>
-                          handleUpdateBook(book.id, 'rating', index + 1)
+                          handleUpdateBook(book.id, "rating", index + 1)
                         }
                       />
                     ))}
@@ -103,12 +105,12 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                 )}
 
                 {/* PROGRESS */}
-                {shelfName === 'Currently Reading' && (
+                {shelfName === "Currently Reading" && (
                   <div className="flex items-center space-x-2">
                     <input
                       type="number"
                       placeholder="Read"
-                      value={book.pagesRead || '0'}
+                      value={book.pagesRead || "0"}
                       className="p-1 border rounded w-20 text-center"
                       onChange={(e) => {
                         const newPagesRead = Number(e.target.value);
@@ -120,12 +122,12 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                           );
                           return;
                         }
-                        handleUpdateBook(book.id, 'pagesRead', newPagesRead);
+                        handleUpdateBook(book.id, "pagesRead", newPagesRead);
 
                         if (newPagesRead == pagesTotal && pagesTotal != 0) {
-                          handleMoveBook(book.id, 'Read');
+                          handleMoveBook(book.id, "Read");
                           alert(
-                            'Congratulations! You have completed the book, moving it to the Read shelf.'
+                            "Congratulations! You have completed the book, moving it to the Read shelf."
                           );
                         }
                       }}
@@ -139,16 +141,16 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                         <input
                           type="number"
                           placeholder="Total"
-                          defaultValue={book.pagesTotal || ''}
+                          defaultValue={book.pagesTotal || ""}
                           className="p-1 border rounded w-20 text-center"
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               const inputValue = (e.target as HTMLInputElement)
                                 .value;
                               if (inputValue) {
                                 handleUpdateBook(
                                   book.id,
-                                  'pagesTotal',
+                                  "pagesTotal",
                                   Number(inputValue)
                                 );
                               }

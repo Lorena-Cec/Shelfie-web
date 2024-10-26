@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
-import { auth, db } from '@/lib/firebaseConfig';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'next/router';
-import { toast } from 'react-toastify';
-import { Book } from '../models/Book';
+import { useState, useEffect } from "react";
+import { auth, db } from "@/lib/firebaseConfig";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/router";
+import { toast } from "react-toastify";
+import { Book } from "../models/Book";
 
 const useShelves = () => {
-  const [selectedShelf, setSelectedShelf] = useState<string>('Read');
+  const [selectedShelf, setSelectedShelf] = useState<string>("Read");
   const [books, setBooks] = useState<Book[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [hoveredRatings, setHoveredRatings] = useState<{
@@ -28,24 +28,24 @@ const useShelves = () => {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      if (!userId) return;
-      try {
-        const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
-        const shelfSnap = await getDoc(shelfRef);
+  const fetchBooks = async () => {
+    if (!userId) return;
+    try {
+      const shelfRef = doc(db, "users", userId, "shelves", selectedShelf);
+      const shelfSnap = await getDoc(shelfRef);
 
-        if (shelfSnap.exists()) {
-          setBooks(shelfSnap.data().books || []);
-        } else {
-          console.log('No such shelf!');
-          setBooks([]);
-        }
-      } catch (error) {
-        console.error('Error fetching books:', error);
+      if (shelfSnap.exists()) {
+        setBooks(shelfSnap.data().books || []);
+      } else {
+        console.log("No such shelf!");
+        setBooks([]);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  };
 
+  useEffect(() => {
     if (userId) {
       fetchBooks();
     }
@@ -58,7 +58,7 @@ const useShelves = () => {
   useEffect(() => {
     if (
       shelf &&
-      (shelf === 'Read' || shelf === 'Currently Reading' || shelf === 'To Read')
+      (shelf === "Read" || shelf === "Currently Reading" || shelf === "To Read")
     ) {
       setSelectedShelf(shelf as string);
     }
@@ -67,7 +67,7 @@ const useShelves = () => {
   const handleDeleteBook = async (bookId: string) => {
     try {
       if (!userId) return;
-      const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
+      const shelfRef = doc(db, "users", userId, "shelves", selectedShelf);
       const shelfSnap = await getDoc(shelfRef);
 
       if (shelfSnap.exists()) {
@@ -79,7 +79,7 @@ const useShelves = () => {
         toast.success(`Book has been removed from the shelf!`);
       }
     } catch (error) {
-      console.error('Error deleting book:', error);
+      console.error("Error deleting book:", error);
     }
   };
 
@@ -90,7 +90,7 @@ const useShelves = () => {
       const book = books.find((b: any) => b.id === bookId);
       if (!userId || !book) return;
 
-      const newShelfRef = doc(db, 'users', userId, 'shelves', newShelf);
+      const newShelfRef = doc(db, "users", userId, "shelves", newShelf);
       const newShelfSnap = await getDoc(newShelfRef);
       const newBooks =
         (newShelfSnap.exists() ? newShelfSnap.data().books : []) || [];
@@ -103,9 +103,9 @@ const useShelves = () => {
 
       toast.success(`Book has been moved to the ${newShelf} shelf!`);
     } catch (error) {
-      console.error('Error moving book:', error);
+      console.error("Error moving book:", error);
 
-      toast.error('Error moving book. Please try again.');
+      toast.error("Error moving book. Please try again.");
     }
   };
 
@@ -118,12 +118,12 @@ const useShelves = () => {
       if (!userId) return;
       const currentShelfRef = doc(
         db,
-        'users',
+        "users",
         userId,
-        'shelves',
+        "shelves",
         selectedShelf
       );
-      const newShelfRef = doc(db, 'users', userId, 'shelves', newShelf);
+      const newShelfRef = doc(db, "users", userId, "shelves", newShelf);
 
       const currentBooks = updatedBooks.filter(
         (book: any) => book.id !== bookId
@@ -144,7 +144,7 @@ const useShelves = () => {
         { merge: true }
       );
     } catch (error) {
-      console.error('Error moving book to shelf:', error);
+      console.error("Error moving book to shelf:", error);
     }
   };
 
@@ -155,7 +155,7 @@ const useShelves = () => {
   ) => {
     try {
       if (!userId) return;
-      const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
+      const shelfRef = doc(db, "users", userId, "shelves", selectedShelf);
       const shelfSnap = await getDoc(shelfRef);
 
       if (shelfSnap.exists()) {
@@ -167,20 +167,20 @@ const useShelves = () => {
         await setDoc(shelfRef, { books: updatedBooks }, { merge: true });
         setBooks(updatedBooks);
 
-        if (field === 'startReading' && value && selectedShelf === 'To Read') {
-          await moveBookToShelf(bookId, 'Currently Reading', updatedBooks);
-          toast.success('Book moved to Currently Reading shelf');
+        if (field === "startReading" && value && selectedShelf === "To Read") {
+          await moveBookToShelf(bookId, "Currently Reading", updatedBooks);
+          toast.success("Book moved to Currently Reading shelf");
         } else if (
-          field === 'readDate' &&
+          field === "readDate" &&
           value &&
-          (selectedShelf === 'To Read' || selectedShelf === 'Currently Reading')
+          (selectedShelf === "To Read" || selectedShelf === "Currently Reading")
         ) {
-          await moveBookToShelf(bookId, 'Read', updatedBooks);
-          toast.success('Book moved to Read shelf');
+          await moveBookToShelf(bookId, "Read", updatedBooks);
+          toast.success("Book moved to Read shelf");
         }
       }
     } catch (error) {
-      console.error('Error updating book:', error);
+      console.error("Error updating book:", error);
     }
   };
 
@@ -197,7 +197,7 @@ const useShelves = () => {
         )
       );
     } catch (error) {
-      console.error('Error updating book:', error);
+      console.error("Error updating book:", error);
     }
   };
 
@@ -208,7 +208,7 @@ const useShelves = () => {
     try {
       if (!userId) return;
 
-      const shelfRef = doc(db, 'users', userId, 'shelves', selectedShelf);
+      const shelfRef = doc(db, "users", userId, "shelves", selectedShelf);
       const shelfSnap = await getDoc(shelfRef);
 
       if (shelfSnap.exists()) {
@@ -219,19 +219,19 @@ const useShelves = () => {
 
         await setDoc(shelfRef, { books: updatedBooks }, { merge: true });
 
-        if (updates.startReading && selectedShelf === 'To Read') {
-          await moveBookToShelf(bookId, 'Currently Reading', updatedBooks);
-          toast.success('Book moved to Currently Reading shelf');
+        if (updates.startReading && selectedShelf === "To Read") {
+          await moveBookToShelf(bookId, "Currently Reading", updatedBooks);
+          toast.success("Book moved to Currently Reading shelf");
         } else if (
           updates.readDate &&
-          (selectedShelf === 'To Read' || selectedShelf === 'Currently Reading')
+          (selectedShelf === "To Read" || selectedShelf === "Currently Reading")
         ) {
-          await moveBookToShelf(bookId, 'Read', updatedBooks);
-          toast.success('Book moved to Read shelf');
+          await moveBookToShelf(bookId, "Read", updatedBooks);
+          toast.success("Book moved to Read shelf");
         }
       }
     } catch (error) {
-      console.error('Error updating book:', error);
+      console.error("Error updating book:", error);
     }
   };
 
@@ -239,6 +239,10 @@ const useShelves = () => {
     selectedShelf,
     setSelectedShelf: handleShelfSelect,
     books,
+    userId,
+    setBooks,
+    fetchBooks,
+    setUserId,
     handleDeleteBook,
     handleMoveBook,
     handleUpdateBook,
