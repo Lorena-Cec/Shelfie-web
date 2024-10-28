@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { auth, db } from '@/lib/firebaseConfig';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth, db } from "@/lib/firebaseConfig";
+import { onAuthStateChanged, User } from "firebase/auth";
 import {
   arrayUnion,
   collection,
   doc,
   getDocs,
   setDoc,
-} from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 const useShelfFunctions = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -29,7 +29,7 @@ const useShelfFunctions = () => {
 
   const fetchUserShelves = async (userId: string) => {
     try {
-      const shelvesRef = collection(db, 'users', userId, 'shelves');
+      const shelvesRef = collection(db, "users", userId, "shelves");
       const shelvesSnap = await getDocs(shelvesRef);
       const shelfBooks: { [key: string]: any[] } = {};
 
@@ -40,13 +40,13 @@ const useShelfFunctions = () => {
 
       setShelves(shelfBooks);
     } catch (error) {
-      console.error('Error fetching user shelves:', error);
+      console.error("Error fetching user shelves:", error);
     }
   };
 
   const handleAddToShelf = async (book: any, shelf: string) => {
     if (!user) {
-      console.error('No user is logged in');
+      console.error("No user is logged in");
       return;
     }
 
@@ -54,8 +54,8 @@ const useShelfFunctions = () => {
       const userId = user.uid;
       const isbn =
         book.volumeInfo.industryIdentifiers?.find(
-          (identifier: { type: string }) => identifier.type === 'ISBN_13'
-        )?.identifier || '';
+          (identifier: { type: string }) => identifier.type === "ISBN_13"
+        )?.identifier || "";
 
       const bookData = {
         id: book.id,
@@ -70,12 +70,13 @@ const useShelfFunctions = () => {
         addedDate: new Date().toISOString(),
         startReading: null,
         readDate: null,
-        review: '',
+        review: "",
         rereadDates: null,
-        quotes: '',
+        quotes: "",
+        uploadedDocument: "",
       };
 
-      const shelfRef = doc(db, 'users', userId, 'shelves', shelf);
+      const shelfRef = doc(db, "users", userId, "shelves", shelf);
 
       await setDoc(
         shelfRef,
@@ -88,7 +89,7 @@ const useShelfFunctions = () => {
       alert(`Added book to ${shelf} shelf successfully!`);
       fetchUserShelves(userId);
     } catch (error) {
-      console.error('Error adding book to shelf:', error);
+      console.error("Error adding book to shelf:", error);
     }
   };
 

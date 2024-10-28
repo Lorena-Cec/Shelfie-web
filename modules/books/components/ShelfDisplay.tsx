@@ -1,16 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useState } from "react";
 import { Book } from "../models/Book";
 import BookActions from "./BookActionsButtons";
 import { Timestamp } from "firebase/firestore";
+import { FaUpload, FaBook } from "react-icons/fa";
+import { storage } from "@/lib/firebaseConfig";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import DocumentModal from "./DocumentModal";
 
 interface ShelfDisplayProps {
   shelfName: string;
   books: Book[];
   hoveredRatings?: { [key: string]: number | null };
-  setBooks: (prev: any) => void;
   setHoveredRatings: (prev: any) => void;
-  fetchBooks: () => Promise<void>;
   handleUpdateBook: (id: string, field: string, value: any) => void;
   handleDeleteBook: (id: string) => void;
   handleMoveBook: (id: string, newShelf: string) => void;
@@ -24,14 +31,58 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
   handleUpdateBook,
   handleMoveBook,
 }) => {
+  const [documentToView, setDocumentToView] = useState<string | null>(null);
+  const [viewTitle, setViewTitle] = useState<string>("");
+
   const formatDate = (date: any) => {
     return date instanceof Timestamp
       ? date.toDate().toLocaleDateString()
       : "N/A";
   };
 
+  const uploadFile = async (
+    file: File,
+    bookId: string,
+    existingFileUrl?: string
+  ): Promise<string> => {
+    try {
+      if (existingFileUrl) {
+        const oldFileRef = ref(storage, existingFileUrl);
+        await deleteObject(oldFileRef);
+      }
+
+      const fileRef = ref(storage, `books/${bookId}/${file.name}`);
+      await uploadBytes(fileRef, file);
+      const downloadUrl = await getDownloadURL(fileRef);
+
+      return downloadUrl;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+  };
+
+  const handleFileUpload = async (
+    book: Book,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      try {
+        const uploadedUrl = await uploadFile(
+          file,
+          book.id,
+          book.uploadedDocument
+        );
+        await handleUpdateBook(book.id, "uploadedDocument", uploadedUrl);
+      } catch (error) {
+        console.error("Failed to upload and update file URL:", error);
+      }
+    }
+  };
+
   return (
-    <div className="text-center mt-8 w-full ">
+    <div className="text-center mt-8 w-full">
       {books.length === 0 ? (
         <p className="text-sm mt-4">
           Add books to {shelfName} -{" "}
@@ -42,15 +93,22 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
       ) : (
         <div className="flex flex-col gap-2 mt-4">
           <div
-            className={`grid ${shelfName === "To Read" ? "grid-cols-6" : shelfName === "Currently Reading" ? "grid-cols-8" : "grid-cols-7"} gap-4 px-16 py-4 font-bold bg-orange-300 text-brown-700`}
+            className={`grid ${
+              shelfName === "To Read"
+                ? "grid-cols-7"
+                : shelfName === "Currently Reading"
+                  ? "grid-cols-9"
+                  : "grid-cols-8"
+            } gap-4 px-16 py-4 font-bold bg-orange-300 text-brown-700`}
           >
             <div></div>
             <p>TITLE & AUTHOR</p>
             {shelfName !== "To Read" && <p>RATING</p>}
-            {shelfName == "Currently Reading" && <p>PROGRESS</p>}
+            {shelfName === "Currently Reading" && <p>PROGRESS</p>}
             <p>ADDED DATE</p>
             <p>START OF READING</p>
             <p>READ DATE</p>
+            <p>E-BOOK</p> {/* New E-BOOK Column */}
             <div></div>
           </div>
 
@@ -58,32 +116,38 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
             {books.map((book) => (
               <div
                 key={book.id}
-                className={`grid ${shelfName === "To Read" ? "grid-cols-6" : shelfName === "Currently Reading" ? "grid-cols-8" : "grid-cols-7"} gap-4 place-items-center px-16 py-8 bg-orange-600 text-brown-100`}
+                className={`grid ${
+                  shelfName === "To Read"
+                    ? "grid-cols-7"
+                    : shelfName === "Currently Reading"
+                      ? "grid-cols-9"
+                      : "grid-cols-8"
+                } gap-4 place-items-center px-16 py-8 bg-orange-600 text-brown-100`}
               >
                 {/* COVER */}
                 <a href={`/googleBooks/${book.id}`}>
                   <img
                     src={book.image}
                     alt={book.title}
-                    className="w-36 h-52 shadow-3xl "
+                    className="w-24 h-40 shadow-3xl"
                   />
                 </a>
 
                 {/* Title and Authors */}
                 <div>
-                  <p className="text-xl font-bold">{book.title}</p>
+                  <p className="text-lg font-bold">{book.title}</p>
                   <p>{book.authors?.join(", ")}</p>
                 </div>
 
                 {/* RATING */}
                 {shelfName !== "To Read" && (
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-px">
                     {Array.from({ length: 5 }, (_, index) => (
                       <img
                         key={index}
                         src={`/stars${index < (hoveredRatings?.[book.id] ?? book.rating ?? 0) ? index + 1 : 0}.png`}
                         alt={`${index + 1} star`}
-                        className="w-8 h-8 cursor-pointer"
+                        className="w-7 h-7 cursor-pointer"
                         onMouseEnter={() =>
                           setHoveredRatings((prev: any) => ({
                             ...prev,
@@ -124,7 +188,7 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                         }
                         handleUpdateBook(book.id, "pagesRead", newPagesRead);
 
-                        if (newPagesRead == pagesTotal && pagesTotal != 0) {
+                        if (newPagesRead === pagesTotal && pagesTotal !== 0) {
                           handleMoveBook(book.id, "Read");
                           alert(
                             "Congratulations! You have completed the book, moving it to the Read shelf."
@@ -173,12 +237,48 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                 {/* READ DATE */}
                 <p className="text-lg">{formatDate(book.readDate)}</p>
 
+                {/* UPLOAD */}
+                <div className="flex flex-col items-center gap-4">
+                  <label
+                    htmlFor={`upload-${book.id}`}
+                    className="cursor-pointer"
+                  >
+                    <FaUpload className="text-2xl" />
+                  </label>
+                  <input
+                    type="file"
+                    id={`upload-${book.id}`}
+                    className="hidden"
+                    accept=".pdf,.epub"
+                    onChange={(event) => handleFileUpload(book, event)}
+                  />
+
+                  {book.uploadedDocument && (
+                    <FaBook
+                      className="text-2xl cursor-pointer"
+                      onClick={() => {
+                        setDocumentToView(book.uploadedDocument);
+                        setViewTitle(book.title);
+                      }}
+                    />
+                  )}
+                </div>
+
                 {/* EDIT, DELETE & MOVE ACTIONS */}
                 <BookActions book={book}></BookActions>
               </div>
             ))}
           </div>
         </div>
+      )}
+
+      {/* Modal za prikaz dokumenta */}
+      {documentToView && (
+        <DocumentModal
+          documentUrl={documentToView}
+          title={viewTitle}
+          onClose={() => setDocumentToView(null)}
+        />
       )}
     </div>
   );

@@ -11,8 +11,6 @@ const ShelvesMenu: React.FC = () => {
     selectedShelf,
     setSelectedShelf,
     books,
-    setBooks,
-    fetchBooks,
     handleDeleteBook,
     handleMoveBook,
     handleUpdateBook,
@@ -63,8 +61,6 @@ const ShelvesMenu: React.FC = () => {
       <ShelfDisplay
         shelfName={selectedShelf}
         books={books}
-        setBooks={setBooks}
-        fetchBooks={fetchBooks}
         hoveredRatings={hoveredRatings}
         setHoveredRatings={setHoveredRatings}
         handleUpdateBook={handleUpdateBook}

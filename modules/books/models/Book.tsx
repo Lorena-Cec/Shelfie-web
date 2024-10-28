@@ -12,4 +12,5 @@ export interface Book {
   rereadDates: string[];
   quotes: string[];
   review: string;
+  uploadedDocument: string;
 }
