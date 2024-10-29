@@ -80,11 +80,11 @@ input[type="range"]::-ms-thumb {
 .viewer {
   width: 100%;
   height: 100%;
-  overflow: auto; /* Omogućava skrolovanje */
+  overflow: auto;
   position: relative;
-  background-color: white; /* Postavi pozadinsku boju */
+  background-color: white;
 }
 
-.epub-container:first-child {
-  display: none;
+.epub-container:first-of-type {
+  display: none !important;
 }
