@@ -1,15 +1,15 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import NavBar from '@/components/NavBar';
-import { auth } from '@/lib/firebaseConfig';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import React from 'react';
-import ShelfButtons from '@/modules/books/components/ShelfButtons';
-import useShelfFunctions from '@/modules/books/hooks/useShelfFunctions';
-import Footer from '@/components/Footer';
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import NavBar from "@/components/NavBar";
+import { auth } from "@/lib/firebaseConfig";
+import { onAuthStateChanged, User } from "firebase/auth";
+import React from "react";
+import ShelfButtons from "@/modules/books/components/ShelfButtons";
+import useShelfFunctions from "@/modules/books/hooks/useShelfFunctions";
+import Footer from "@/components/Footer";
 
 const SearchPage = () => {
   const { fetchUserShelves } = useShelfFunctions();
@@ -40,7 +40,7 @@ const SearchPage = () => {
       setError(null);
 
       try {
-        const response = await axios.get('/api/books', {
+        const response = await axios.get("/api/books", {
           params: {
             searchType,
             searchTerm,
@@ -49,7 +49,7 @@ const SearchPage = () => {
         setBooks(response.data.items || []);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        setError('Failed to fetch books');
+        setError("Failed to fetch books");
       } finally {
         setLoading(false);
       }
@@ -89,15 +89,15 @@ const SearchPage = () => {
                       {book.volumeInfo.title}
                     </h2>
                     <p className="text-brown-200 text-lg">
-                      by{' '}
-                      {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}
+                      by{" "}
+                      {book.volumeInfo.authors?.join(", ") || "Unknown Author"}
                     </p>
                     <p className="text-brown-300">
-                      Published: {book.volumeInfo.publishedDate || 'N/A'}
+                      Published: {book.volumeInfo.publishedDate || "N/A"}
                     </p>
                   </a>
                   <p className="text-brown-200 text-lg mb-4">
-                    {book.volumeInfo.description?.slice(0, 100)}...{' '}
+                    {book.volumeInfo.description?.slice(0, 100)}...{" "}
                     <a
                       href={`/googleBooks/${book.id}`}
                       className="text-brown-300 hover:text-brown-100"

@@ -1,5 +1,5 @@
-import SearchScreen from '@/modules/books/screens/SearchScreen';
-import React from 'react';
+import SearchScreen from "@/modules/books/screens/SearchScreen";
+import React from "react";
 
 const SearchPage = () => {
   return (

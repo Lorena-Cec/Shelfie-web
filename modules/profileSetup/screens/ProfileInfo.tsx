@@ -1,38 +1,37 @@
-import React, { useState } from 'react';
-import NavNewUser from '@/modules/profileSetup/components/NavNewUser';
-import { useRouter } from 'next/router';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebaseConfig';
-import Link from 'next/link';
+import React, { useState } from "react";
+import NavNewUser from "@/modules/profileSetup/components/NavNewUser";
+import { useRouter } from "next/router";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebaseConfig";
 
 const ProfileSetup: React.FC = () => {
-  const [country, setCountry] = useState('');
-  const [city, setCity] = useState('');
-  const [favoriteBook, setFavoriteBook] = useState('');
-  const [aboutMe, setAboutMe] = useState('');
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [favoriteBook, setFavoriteBook] = useState("");
+  const [aboutMe, setAboutMe] = useState("");
   const [hobbies, setHobbies] = useState<string[]>([]);
-  const [otherHobby, setOtherHobby] = useState('');
-  const [isOtherSelected, setIsOtherSelected] = useState(false);
+  const [otherHobby, setOtherHobby] = useState("");
+  const [isOtherSelected] = useState(false);
 
   const router = useRouter();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const allHobbies = [
-    'Bookbinding',
-    'Drawing',
-    'Writing',
-    'Painting',
-    'Photography',
-    'Videography',
-    'Other',
+    "Bookbinding",
+    "Drawing",
+    "Writing",
+    "Painting",
+    "Photography",
+    "Videography",
+    "Other",
   ];
 
   const toggleHobby = (hobby: string) => {
     if (hobbies.includes(hobby)) {
-      setHobbies(hobbies.filter((h) => h !== hobby)); // Ukloni hobi ako je već odabran
+      setHobbies(hobbies.filter((h) => h !== hobby));
     } else {
-      setHobbies([...hobbies, hobby]); // Dodaj hobi
+      setHobbies([...hobbies, hobby]);
     }
   };
 
@@ -43,11 +42,11 @@ const ProfileSetup: React.FC = () => {
     if (user) {
       const finalHobbies =
         isOtherSelected && otherHobby
-          ? [...hobbies.filter((h) => h !== 'Other'), otherHobby]
+          ? [...hobbies.filter((h) => h !== "Other"), otherHobby]
           : hobbies;
 
       await setDoc(
-        doc(db, 'users', user.uid),
+        doc(db, "users", user.uid),
         {
           ProfileInfo: {
             city,
@@ -59,8 +58,8 @@ const ProfileSetup: React.FC = () => {
         },
         { merge: true }
       );
-      console.log('Profile info saved successfully.');
-      router.push('/setup/goalsSetup');
+      console.log("Profile info saved successfully.");
+      router.push("/setup/goalsSetup");
     }
   };
 
@@ -126,7 +125,7 @@ const ProfileSetup: React.FC = () => {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="w-full text-brown-100 px-4 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-orange-400 text-left"
               >
-                {hobbies.length > 0 ? hobbies.join(', ') : 'Select hobbies'}
+                {hobbies.length > 0 ? hobbies.join(", ") : "Select hobbies"}
               </button>
 
               {isDropdownOpen && (
@@ -149,7 +148,7 @@ const ProfileSetup: React.FC = () => {
               )}
             </div>
 
-            {hobbies.includes('Other') && (
+            {hobbies.includes("Other") && (
               <input
                 type="text"
                 placeholder="Other hobby"

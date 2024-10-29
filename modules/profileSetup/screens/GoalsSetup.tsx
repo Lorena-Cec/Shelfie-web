@@ -1,26 +1,25 @@
-import React, { useState } from 'react';
-import NavNewUser from '@/modules/profileSetup/components/NavNewUser';
-import { useRouter } from 'next/router';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebaseConfig';
-import Link from 'next/link';
+import React, { useState } from "react";
+import NavNewUser from "@/modules/profileSetup/components/NavNewUser";
+import { useRouter } from "next/router";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebaseConfig";
 
 const GoalsSetup: React.FC = () => {
   const [goals, setGoals] = useState<string[]>([]);
-  const [otherGoal, setOtherGoal] = useState('');
-  const [isOtherSelected, setIsOtherSelected] = useState(false);
+  const [otherGoal, setOtherGoal] = useState("");
+  const [isOtherSelected] = useState(false);
   const [booksToRead, setBooksToRead] = useState(10);
 
   const router = useRouter();
 
   const allgoals = [
-    'Read more classics',
-    'Try reading horrors/thrillers',
-    'Write more',
-    'Try bookbinding',
-    'Draw manga',
-    'Try audiobooks',
-    'Other',
+    "Read more classics",
+    "Try reading horrors/thrillers",
+    "Write more",
+    "Try bookbinding",
+    "Draw manga",
+    "Try audiobooks",
+    "Other",
   ];
 
   const toggleGoal = (goal: string) => {
@@ -36,18 +35,18 @@ const GoalsSetup: React.FC = () => {
 
     const user = auth.currentUser;
     if (!user) {
-      console.error('No authenticated user found.');
+      console.error("No authenticated user found.");
       return;
     }
 
     const finalGoals =
       isOtherSelected && otherGoal
-        ? [...goals.filter((h) => h !== 'Other'), otherGoal]
+        ? [...goals.filter((h) => h !== "Other"), otherGoal]
         : goals;
 
     try {
       await setDoc(
-        doc(db, 'users', user.uid),
+        doc(db, "users", user.uid),
         {
           ProfileInfo: {
             goals: finalGoals,
@@ -56,10 +55,10 @@ const GoalsSetup: React.FC = () => {
         },
         { merge: true }
       );
-      console.log('Goals saved successfully.');
-      router.push('/setup/genreSelect');
+      console.log("Goals saved successfully.");
+      router.push("/setup/genreSelect");
     } catch (error) {
-      console.error('Error saving goals: ', error);
+      console.error("Error saving goals: ", error);
     }
   };
 
@@ -111,7 +110,7 @@ const GoalsSetup: React.FC = () => {
                 style={{ background: getTrackBackground(booksToRead) }}
               />
               <p className="text-brown-300 text-center mt-4">
-                You will read <span className="font-bold">{booksToRead}</span>{' '}
+                You will read <span className="font-bold">{booksToRead}</span>{" "}
                 books this year!
               </p>
             </div>
@@ -140,7 +139,7 @@ const GoalsSetup: React.FC = () => {
                 ))}
               </div>
 
-              {goals.includes('Other') && (
+              {goals.includes("Other") && (
                 <input
                   type="text"
                   placeholder="Other goal"

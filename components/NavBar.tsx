@@ -1,26 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { auth } from '@/lib/firebaseConfig';
-import { setUser } from '@/modules/authenticaton/state/authSlice';
-import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
+import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { auth } from "@/lib/firebaseConfig";
+import { setUser } from "@/modules/authenticaton/state/authSlice";
+import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
 
 const NavBar = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [searchType, setSearchType] = useState<string>('subject');
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchType, setSearchType] = useState<string>("subject");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLUListElement | null>(null);
 
   const genres = [
-    { name: 'Fiction', subject: 'fiction' },
-    { name: 'Non-Fiction', subject: 'non-fiction' },
-    { name: 'Science Fiction', subject: 'science fiction' },
-    { name: 'Fantasy', subject: 'fantasy' },
-    { name: 'Mystery', subject: 'mystery' },
-    { name: 'Romance', subject: 'romance' },
-    { name: 'Biography', subject: 'biography' },
+    { name: "Fiction", subject: "fiction" },
+    { name: "Non-Fiction", subject: "non-fiction" },
+    { name: "Science Fiction", subject: "science fiction" },
+    { name: "Fantasy", subject: "fantasy" },
+    { name: "Mystery", subject: "mystery" },
+    { name: "Romance", subject: "romance" },
+    { name: "Biography", subject: "biography" },
   ];
 
   const handleGenreSelect = (subject: string) => {
@@ -32,16 +32,16 @@ const NavBar = () => {
     try {
       await auth.signOut();
       dispatch(setUser(null));
-      router.push('/auth/login');
+      router.push("/auth/login");
     } catch (error) {
-      console.error('Error logging out: ', error);
+      console.error("Error logging out: ", error);
     }
   };
 
   const handleSearch = () => {
     if (!searchTerm) return;
     router.push({
-      pathname: '/search',
+      pathname: "/search",
       query: { searchType, searchTerm },
     });
   };
@@ -56,10 +56,10 @@ const NavBar = () => {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -111,7 +111,7 @@ const NavBar = () => {
         <li className="relative hover:bg-orange-200">
           <p
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={`cursor-pointer px-5 py-3 ${dropdownOpen ? 'bg-orange-300' : ''}`}
+            className={`cursor-pointer px-5 py-3 ${dropdownOpen ? "bg-orange-300" : ""}`}
           >
             Browse
           </p>
@@ -129,6 +129,11 @@ const NavBar = () => {
               ))}
             </ul>
           )}
+        </li>
+        <li>
+          <a href="/profile" className="px-5 py-2">
+            Profile
+          </a>
         </li>
         <li>
           <p onClick={handleLogout} className="cursor-pointer px-5 py-3">
