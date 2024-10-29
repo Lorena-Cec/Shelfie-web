@@ -29,7 +29,6 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
   hoveredRatings = {},
   setHoveredRatings,
   handleUpdateBook,
-  handleMoveBook,
 }) => {
   const [documentToView, setDocumentToView] = useState<string | null>(null);
   const [viewTitle, setViewTitle] = useState<string>("");
@@ -171,58 +170,9 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                 {/* PROGRESS */}
                 {shelfName === "Currently Reading" && (
                   <div className="flex items-center space-x-2">
-                    <input
-                      type="number"
-                      placeholder="Read"
-                      value={book.pagesRead || "0"}
-                      className="p-1 border rounded w-20 text-center"
-                      onChange={(e) => {
-                        const newPagesRead = Number(e.target.value);
-                        const pagesTotal = book.pagesTotal || 0;
-
-                        if (newPagesRead > pagesTotal && pagesTotal > 0) {
-                          alert(
-                            "You can't read more than the total number of pages."
-                          );
-                          return;
-                        }
-                        handleUpdateBook(book.id, "pagesRead", newPagesRead);
-
-                        if (newPagesRead === pagesTotal && pagesTotal !== 0) {
-                          handleMoveBook(book.id, "Read");
-                          alert(
-                            "Congratulations! You have completed the book, moving it to the Read shelf."
-                          );
-                        }
-                      }}
-                    />
-
-                    {book.pagesTotal && book.pagesTotal > 0 ? (
-                      <p className="text-lg">/{book.pagesTotal}</p>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <p className="text-lg">/</p>
-                        <input
-                          type="number"
-                          placeholder="Total"
-                          defaultValue={book.pagesTotal || ""}
-                          className="p-1 border rounded w-20 text-center"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              const inputValue = (e.target as HTMLInputElement)
-                                .value;
-                              if (inputValue) {
-                                handleUpdateBook(
-                                  book.id,
-                                  "pagesTotal",
-                                  Number(inputValue)
-                                );
-                              }
-                            }
-                          }}
-                        />
-                      </div>
-                    )}
+                    <p className="text-lg">{book.pagesRead}</p>
+                    <p className="text-lg">/</p>
+                    <p className="text-lg">{book.pagesTotal}</p>
                   </div>
                 )}
 

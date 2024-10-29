@@ -3,6 +3,8 @@ import React from "react";
 import useShelves from "../hooks/useShelves";
 import { Book } from "../models/Book";
 import { Timestamp } from "firebase/firestore";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface BookActionsProps {
   book: Book;
@@ -28,6 +30,8 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
     book.rereadDates || []
   );
   const [newRereadDate, setNewRereadDate] = useState<string>("");
+  const [newPagesRead, setNewPagesRead] = useState(0);
+  const [newPagesTotal, setNewPagesTotal] = useState(0);
 
   useEffect(() => {
     if (book) {
@@ -35,6 +39,8 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
       setRereadDates(book.rereadDates || []);
       setQuotes(book.quotes || []);
       setRating(book.rating || 0);
+      setNewPagesRead(book.pagesRead || 0);
+      setNewPagesTotal(book.pagesTotal || 0);
 
       if (
         book.startReading &&
@@ -83,9 +89,25 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
       startReading: startReadingDate,
       readDate: readDate,
       rereadDates: rereadDates,
+      pagesRead: newPagesRead,
+      pagesTotal: newPagesTotal,
     };
+
+    if (newPagesRead > newPagesTotal && newPagesTotal > 0) {
+      alert("You can't read more than the total number of pages.");
+      return;
+    }
+
+    if (newPagesRead >= newPagesTotal && newPagesTotal !== 0) {
+      alert(
+        "Congratulations! You have completed the book, set the read date to move it to your Read shelf."
+      );
+    }
     handleSetBooks(book.id, updates);
     handleUpdatesBook(book.id, updates);
+    toast.success(
+      `You've successfully edited ${book.title}! Refresh to see the changes.`
+    );
     setIsModalOpen(false);
   };
 
@@ -134,7 +156,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
       {/* Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full h-full overflow-scroll">
             {/* Book Details */}
             <div className="flex items-center mb-4">
               <img
@@ -187,6 +209,39 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
                 Currently on: {selectedShelf}
               </p>
             </div>
+
+            {/* PROGRESS */}
+            {selectedShelf === "Currently Reading" && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="number"
+                  placeholder="Read"
+                  defaultValue={book.pagesRead || 0}
+                  className="p-1 border rounded w-20 text-center"
+                  onChange={(e) => {
+                    const pages = Number(e.target.value);
+                    const pagesTotal = book.pagesTotal;
+                    if (pages > pagesTotal && pagesTotal > 0) {
+                      alert(
+                        "Are you sure this is the number of pages you've read? You can't read more than the total number of pages."
+                      );
+                      return;
+                    }
+                    setNewPagesRead(Number(e.target.value));
+                  }}
+                />
+                <p className="text-lg">/</p>
+                <input
+                  type="number"
+                  placeholder="Total"
+                  defaultValue={book.pagesTotal || 0}
+                  className="p-1 border rounded w-20 text-center"
+                  onChange={(e) => {
+                    setNewPagesTotal(Number(e.target.value));
+                  }}
+                />
+              </div>
+            )}
 
             {/* Review */}
             <div className="mb-4">

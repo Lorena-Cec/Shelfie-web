@@ -1,15 +1,15 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import NavBar from '@/components/NavBar';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper-bundle.css';
-import { Navigation } from 'swiper/modules';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '@/lib/firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
-import Footer from '@/components/Footer';
+import NavBar from "@/components/NavBar";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/swiper-bundle.css";
+import { Navigation } from "swiper/modules";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "@/lib/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import Footer from "@/components/Footer";
 
 interface Book {
   primary_isbn13: string;
@@ -31,17 +31,17 @@ const Home: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const listTypes = [
-    'combined-print-and-e-book-fiction',
-    'graphic-books-and-manga',
-    'trade-fiction-paperback',
-    'young-adult-hardcover',
+    "combined-print-and-e-book-fiction",
+    "graphic-books-and-manga",
+    "trade-fiction-paperback",
+    "young-adult-hardcover",
   ];
 
   const listTitleMap: { [key: string]: string } = {
-    'combined-print-and-e-book-fiction': 'Current Book Ranking',
-    'graphic-books-and-manga': 'Graphic Novels',
-    'trade-fiction-paperback': 'Readers Choice',
-    'young-adult-hardcover': 'Young Adult Favorites',
+    "combined-print-and-e-book-fiction": "Current Book Ranking",
+    "graphic-books-and-manga": "Graphic Novels",
+    "trade-fiction-paperback": "Readers Choice",
+    "young-adult-hardcover": "Young Adult Favorites",
   };
 
   const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<any[]>([]);
@@ -65,7 +65,7 @@ const Home: React.FC = () => {
       const fetchedBooks: BookList[] = [];
 
       try {
-        const storedBooks = localStorage.getItem('nytBooks');
+        const storedBooks = localStorage.getItem("nytBooks");
         if (storedBooks) {
           setBooksByList(JSON.parse(storedBooks));
         } else {
@@ -78,12 +78,12 @@ const Home: React.FC = () => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           }
 
-          localStorage.setItem('nytBooks', JSON.stringify(fetchedBooks));
+          localStorage.setItem("nytBooks", JSON.stringify(fetchedBooks));
           setBooksByList(fetchedBooks);
         }
       } catch (err) {
         console.error(err);
-        setError('Failed to fetch books');
+        setError("Failed to fetch books");
       } finally {
         setLoading(false);
       }
@@ -99,21 +99,21 @@ const Home: React.FC = () => {
       try {
         const shelfRef = doc(
           db,
-          'users',
+          "users",
           userId,
-          'shelves',
-          'Currently Reading'
+          "shelves",
+          "Currently Reading"
         );
         const shelfSnap = await getDoc(shelfRef);
 
         if (shelfSnap.exists()) {
           setCurrentlyReadingBooks(shelfSnap.data().books || []);
         } else {
-          console.log('No such shelf!');
+          console.log("No such shelf!");
           setCurrentlyReadingBooks([]);
         }
       } catch (error) {
-        console.error('Error fetching books:', error);
+        console.error("Error fetching books:", error);
       }
     };
 
@@ -148,22 +148,61 @@ const Home: React.FC = () => {
           <p className="text-xl font-bold mb-4 text-brown-200">
             You are currently reading:
           </p>
-          <Swiper
-            spaceBetween={10}
-            slidesPerView={3.6}
-            loop={false}
-            grabCursor={true}
-            className="w-full"
-          >
-            {currentlyReadingBooks.map((book) => {
-              const remainingPercentage = calculateRemainingPercentage(
-                book.pagesRead,
-                book.pagesTotal
-              );
-              console.log(book);
-              return (
-                <SwiperSlide key={book.id}>
-                  <div className="flex gap-6">
+
+          {currentlyReadingBooks.length > 3 ? (
+            <Swiper
+              spaceBetween={10}
+              slidesPerView={3.6}
+              loop={false}
+              grabCursor={true}
+              className="w-full"
+            >
+              {currentlyReadingBooks.map((book) => {
+                const remainingPercentage = calculateRemainingPercentage(
+                  book.pagesRead,
+                  book.pagesTotal
+                );
+                return (
+                  <SwiperSlide key={book.id}>
+                    <div className="flex gap-6">
+                      <a
+                        href={`/googleBooks/${book.id}`}
+                        className="w-32 h-44 bg-orange-100 shadow-3xl"
+                      >
+                        <img
+                          src={book.image}
+                          alt={book.title}
+                          className="object-cover w-full h-full"
+                        />
+                      </a>
+                      <div className="flex flex-col justify-between py-5">
+                        <p className="text-brown-200 text-lg font-extrabold w-4/5">
+                          {book.title}
+                        </p>
+                        <p className="text-brown-300">
+                          Progress: {remainingPercentage.toFixed(0)}% left
+                        </p>
+                        <a
+                          href="/shelves/Currently%20Reading"
+                          className="text-orange-200 hover:underline"
+                        >
+                          Update progress
+                        </a>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-6">
+              {currentlyReadingBooks.map((book) => {
+                const remainingPercentage = calculateRemainingPercentage(
+                  book.pagesRead,
+                  book.pagesTotal
+                );
+                return (
+                  <div className="flex gap-6" key={book.id}>
                     <a
                       href={`/googleBooks/${book.id}`}
                       className="w-32 h-44 bg-orange-100 shadow-3xl"
@@ -189,10 +228,10 @@ const Home: React.FC = () => {
                       </a>
                     </div>
                   </div>
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="">
@@ -206,13 +245,13 @@ const Home: React.FC = () => {
                 <div className="pt-12 pb-8 px-32">
                   <p className="text-brown-100 open-sans text-3xl">
                     {listTitleMap[list.listType] ||
-                      list.listType.replace(/-/g, ' ').replace('and', '&')}
+                      list.listType.replace(/-/g, " ").replace("and", "&")}
                   </p>
                 </div>
 
                 <div className="">
                   <div className="pl-32">
-                    {list.listType === 'graphic-books-and-manga' && (
+                    {list.listType === "graphic-books-and-manga" && (
                       <Swiper
                         modules={[Navigation]}
                         spaceBetween={40}
@@ -228,8 +267,8 @@ const Home: React.FC = () => {
                                 className="w-56 h-80 shadow-brown-300 shadow-3xl"
                                 style={{
                                   backgroundImage: `url(${book.book_image})`,
-                                  backgroundSize: 'cover',
-                                  backgroundPosition: 'center',
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
                                 }}
                               >
                                 {!book.book_image && (
@@ -241,15 +280,15 @@ const Home: React.FC = () => {
                               <div className="flex flex-col justify-between py-3">
                                 <div>
                                   <p className="font-bold text-xl">
-                                    {book.title || 'No Title Available'}
+                                    {book.title || "No Title Available"}
                                   </p>
                                   <p className="font-semibold">
-                                    {book.author || 'No Author Available'}
+                                    {book.author || "No Author Available"}
                                   </p>
                                 </div>
                                 <p className="w-80">
                                   {book.description ||
-                                    'No Description Available'}
+                                    "No Description Available"}
                                 </p>
                                 <a
                                   href={`/book/${book.primary_isbn13}`}
@@ -266,8 +305,8 @@ const Home: React.FC = () => {
                   </div>
 
                   <div className="px-32 flex justify-between">
-                    {(list.listType === 'combined-print-and-e-book-fiction' ||
-                      list.listType === 'trade-fiction-paperback') &&
+                    {(list.listType === "combined-print-and-e-book-fiction" ||
+                      list.listType === "trade-fiction-paperback") &&
                       list.books.slice(0, 7).map((book: Book) => (
                         <a
                           href={`/book/${book.primary_isbn13}`}
@@ -275,9 +314,9 @@ const Home: React.FC = () => {
                           key={book.primary_isbn13}
                         >
                           {list.listType ===
-                            'combined-print-and-e-book-fiction' && (
+                            "combined-print-and-e-book-fiction" && (
                             <p className="text-brown-200 font-bold text-3xl">
-                              {book.rank || 'N/A'}
+                              {book.rank || "N/A"}
                             </p>
                           )}
                           {book.book_image ? (
@@ -292,19 +331,19 @@ const Home: React.FC = () => {
                             </div>
                           )}
                           <p className="text-brown-200 font-bold w-40">
-                            {book.title || 'No Title Available'}
+                            {book.title || "No Title Available"}
                           </p>
                           <p className="text-brown-200 font-thin ">
-                            {book.author || 'No Author Available'}
+                            {book.author || "No Author Available"}
                           </p>
                         </a>
                       ))}
                   </div>
 
                   <div className="p-0">
-                    {list.listType === 'young-adult-hardcover' && (
+                    {list.listType === "young-adult-hardcover" && (
                       <div className="bg-orange-700 flex w-full gap-4 py-16 px-32 items-start">
-                        {list.listType === 'young-adult-hardcover' &&
+                        {list.listType === "young-adult-hardcover" &&
                           list.books.slice(0, 8).map((book: Book) => (
                             <a
                               href={`/book/${book.primary_isbn13}`}
@@ -323,10 +362,10 @@ const Home: React.FC = () => {
                                 </div>
                               )}
                               <p className="text-brown-200 font-bold text-lg">
-                                {book.title || 'No Title Available'}
+                                {book.title || "No Title Available"}
                               </p>
                               <p className="text-brown-200 font-thin">
-                                {book.author || 'No Author Available'}
+                                {book.author || "No Author Available"}
                               </p>
                             </a>
                           ))}
