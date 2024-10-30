@@ -3,10 +3,8 @@ import { auth, db, storage } from "@/lib/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { ProfileData } from "../models/ProfileData";
-import { useState } from "react";
 
 export const useFirestore = () => {
-  const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<any[]>([]);
   const getProfileData = async (
     userId: string
   ): Promise<ProfileData | null> => {
@@ -105,25 +103,6 @@ export const useFirestore = () => {
     return readBooksThisYear;
   };
 
-  const fetchCurrentlyReadingBooks = async (userId: string) => {
-    if (!userId) return [];
-
-    try {
-      const shelfRef = doc(db, "users", userId, "shelves", "Currently Reading");
-      const shelfSnap = await getDoc(shelfRef);
-
-      if (shelfSnap.exists()) {
-        setCurrentlyReadingBooks(shelfSnap.data().books || []);
-      } else {
-        console.log("No such shelf!");
-        setCurrentlyReadingBooks([]);
-      }
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    }
-    return currentlyReadingBooks;
-  };
-
   return {
     getProfileData,
     updateProfileImage,
@@ -131,6 +110,5 @@ export const useFirestore = () => {
     removeFriend,
     sendInfo,
     getReadBooksThisYear,
-    fetchCurrentlyReadingBooks,
   };
 };

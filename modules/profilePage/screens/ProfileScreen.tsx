@@ -1,15 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { useFirestore } from "../hooks/useFirestore";
 import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
 import "swiper/swiper-bundle.css";
 import { auth, db } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import NavBar from "@/components/NavBar";
-import { ProfileData } from "../models/ProfileData";
+import { ProfileData, useFirestore } from "@/modules/profilePage";
 import { Autoplay } from "swiper/modules";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -28,6 +24,7 @@ const Profile: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [readBooks, setReadBooks] = useState([]);
   const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<any[]>([]);
+  const [recentBook, setRecentBook] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -78,6 +75,8 @@ const Profile: React.FC = () => {
     if (!userId) return;
     const fetchedReadBooks = await getReadBooksThisYear(userId);
     setReadBooks(fetchedReadBooks);
+    const fetchMostRecent = await getMostRecentlyReadBook(userId);
+    setRecentBook(fetchMostRecent);
     const data = await getProfileData(userId);
     if (data) {
       setProfileData(data);
@@ -104,6 +103,37 @@ const Profile: React.FC = () => {
       await addFriend(userId);
       setIsFriend(true);
     }
+  };
+
+  const getMostRecentlyReadBook = async (userId: string) => {
+    const shelvesRef = doc(db, "users", userId, "shelves", "Read");
+    const docSnap = await getDoc(shelvesRef);
+
+    if (!docSnap.exists()) {
+      console.log("No such document!");
+      return null; // Return null if there's no document
+    }
+
+    const data = docSnap.data();
+    const books = data.books || [];
+
+    const booksWithReadDate = books.filter(
+      (book: { readDate?: { toDate: () => Date }; title?: string }) =>
+        book.readDate
+    );
+
+    if (booksWithReadDate.length === 0) {
+      console.log("No books with read dates found.");
+      return null;
+    }
+
+    booksWithReadDate.sort((a: { readDate: any }, b: { readDate: any }) => {
+      const dateA = a.readDate!.toDate();
+      const dateB = b.readDate!.toDate();
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    return booksWithReadDate[0];
   };
 
   const calculateRemainingPercentage = (
@@ -255,18 +285,16 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Currently Reading */}
-          <div className="w-full">
+          <div>
             <h3 className="font-semibold text-lg mt-8">Currently Reading</h3>
             <Swiper
-              spaceBetween={10}
               slidesPerView={1}
               loop={true}
               modules={[Autoplay]}
               autoplay={{
-                delay: 3000,
+                delay: 10000,
                 disableOnInteraction: false,
               }}
-              className="w-full"
             >
               {currentlyReadingBooks.map((book) => {
                 const remainingPercentage = calculateRemainingPercentage(
@@ -274,20 +302,20 @@ const Profile: React.FC = () => {
                   book.pagesTotal
                 );
                 return (
-                  <SwiperSlide key={book.id}>
-                    <div className="flex gap-6 p-5">
+                  <SwiperSlide key={book.id} className="flex items-center">
+                    <div className="flex gap-2 px-5 pb-7 pt-3">
                       <a
                         href={`/googleBooks/${book.id}`}
-                        className="w-32 h-44 bg-orange-100 shadow-3xl"
+                        className="shadow-3xl w-32 h-44"
                       >
                         <img
                           src={book.image}
                           alt={book.title}
-                          className="object-cover w-full h-full"
+                          className="w-32 h-44 object-cover"
                         />
                       </a>
                       <div className="flex flex-col justify-between py-5 pl-5">
-                        <p className="text-brown-200 text-lg font-extrabold w-4/5">
+                        <p className="text-brown-200 font-extrabold w-4/5 max-w-[15rem]">
                           {book.title}
                         </p>
                         <p className="text-brown-300">
@@ -308,18 +336,35 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Recently Read */}
-          <h3 className="font-semibold text-lg mt-8">Recently Read</h3>
-          {profileData.recentlyRead && profileData.recentlyRead.length > 0 ? (
-            <div className="w-32 h-44 bg-gray-200">
-              <img
-                src={profileData.recentlyRead[0].image}
-                alt={profileData.recentlyRead[0].title}
-                className="w-full h-full object-cover"
-              />
-              <p>{profileData.recentlyRead[0].title}</p>
+          <h3 className="font-semibold text-lg mt-4">Recently Read</h3>
+          {recentBook && (
+            <div className="flex gap-2 px-5 pb-7 pt-3">
+              <a href={`/googleBooks/${recentBook.id}`} className="shadow-3xl">
+                <img
+                  src={recentBook.image}
+                  alt={recentBook.title}
+                  className="w-32 h-44"
+                />
+              </a>
+              <div className="flex flex-col justify-between py-5 pl-5">
+                <p className="text-brown-200 font-extrabold w-4/5">
+                  {recentBook.title}
+                </p>
+                <div className="flex space-x-px">
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <img
+                      key={index}
+                      src={`/stars${index < recentBook.rating ? index + 1 : 0}.png`}
+                      alt={`${index + 1} star`}
+                      className="w-7 h-7"
+                    />
+                  ))}
+                </div>
+                <a href="/shelves/Read" className="text-orange-200">
+                  Edit Read Book
+                </a>
+              </div>
             </div>
-          ) : (
-            <p>No recent reads.</p>
           )}
         </div>
       </div>

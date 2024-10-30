@@ -64,7 +64,7 @@ const SearchPage = () => {
       <h1 className="text-2xl my-10 text-center text-brown-100">
         Search Results for "{searchTerm}"
       </h1>
-      <div className="flex flex-col items-center px-32 mb-20">
+      <div className="flex flex-col items-center px-32 mb-20 min-h-screen">
         {loading ? (
           <p className="text-brown-200">Loading...</p>
         ) : error ? (
