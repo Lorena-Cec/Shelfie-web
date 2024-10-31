@@ -5,6 +5,8 @@ import { Book } from "../models/Book";
 import { Timestamp } from "firebase/firestore";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { auth } from "@/lib/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface BookActionsProps {
   book: Book;
@@ -21,6 +23,9 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
     handleDeleteBook,
     handleMoveBook,
     selectedShelf,
+    fetchAndSetShelves,
+    customShelves,
+    fetchBooksOnShelf,
   } = useShelves();
   const [reviewText, setReviewText] = useState(book.review || "");
   const [rating, setRating] = useState(0);
@@ -32,6 +37,31 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
   const [newRereadDate, setNewRereadDate] = useState<string>("");
   const [newPagesRead, setNewPagesRead] = useState(0);
   const [newPagesTotal, setNewPagesTotal] = useState(0);
+  const [, setUserId] = useState<string | null>(null);
+  const [shelvesWithBook, setShelvesWithBook] = useState<string[]>([]);
+  const allShelves = ["Read", "Currently Reading", "To Read"];
+  const combinedShelves = [...customShelves, ...allShelves];
+
+  useEffect(() => {
+    const fetchShelvesForBook = async () => {
+      const shelves: string[] = [];
+
+      for (const shelf of combinedShelves) {
+        const booksOnShelf = await fetchBooksOnShelf(shelf);
+        if (
+          book &&
+          Array.isArray(booksOnShelf) &&
+          booksOnShelf.some((b) => b.id === book.id)
+        ) {
+          shelves.push(shelf);
+        }
+      }
+
+      setShelvesWithBook(shelves);
+    };
+
+    fetchShelvesForBook();
+  }, [book.id, allShelves]);
 
   useEffect(() => {
     if (book) {
@@ -68,6 +98,18 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
     }
   }, [book]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+        fetchAndSetShelves(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const handleQuoteChange = (index: number, value: string) => {
     const updatedQuotes = [...quotes];
     updatedQuotes[index] = value;
@@ -83,7 +125,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
 
   const handleSave = () => {
     const updates = {
-      myRating: rating,
+      rating: rating,
       review: reviewText,
       quotes: quotes,
       startReading: startReadingDate,
@@ -139,26 +181,12 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
         Delete
       </button>
 
-      {/* Move to Shelf Dropdown */}
-      <select
-        className="px-4 py-2 rounded"
-        value=""
-        onChange={(e) => handleMoveBook(book.id, e.target.value)}
-      >
-        <option value="" disabled>
-          Move to...
-        </option>
-        <option value="Read">Read</option>
-        <option value="Currently Reading">Currently Reading</option>
-        <option value="To Read">To Read</option>
-      </select>
-
       {/* Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full h-full overflow-scroll">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl w-full h-0.9 overflow-y-scroll">
             {/* Book Details */}
-            <div className="flex items-center mb-4">
+            <div className="flex mb-4">
               <img
                 src={book.image}
                 alt={book.title}
@@ -171,13 +199,13 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
             </div>
 
             {/* My Rating */}
-            <div className="flex flex-col items-center mb-4">
-              <label className="block font-semibold mb-1">My Rating:</label>
+            <div className="flex items-center mb-4">
+              <p className="font-semibold text-left">My Rating:&ensp;</p>
               <div className="flex space-x-1">
                 {Array.from({ length: 5 }, (_, index) => (
                   <img
                     key={index}
-                    src={`/stars${index < (hoveredRatings?.[book.id] ?? book.rating ?? 0) ? index + 1 : 0}.png`}
+                    src={`/stars${index < (hoveredRatings?.[book.id] ?? rating ?? 0) ? index + 1 : 0}.png`}
                     alt={`${index + 1} star`}
                     className="w-8 h-8 cursor-pointer"
                     onMouseEnter={() =>
@@ -203,16 +231,45 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
             </div>
 
             {/* Bookshelves */}
-            <div className="flex mb-4">
-              <label className="font-semibold mb-1">Bookshelves:</label>
+            <div className="flex mb-3">
+              <label className="font-semibold mb-1">Bookshelves:&ensp;</label>
               <p className="italic text-gray-600">
-                Currently on: {selectedShelf}
+                {shelvesWithBook.length > 0
+                  ? shelvesWithBook.map((shelf, index) => (
+                      <span key={shelf}>
+                        {shelf}
+                        {index < shelvesWithBook.length - 1 && ", "}
+                      </span>
+                    ))
+                  : " This book is not on any shelves."}
               </p>
             </div>
 
+            <select
+              className="px-4 py-2 rounded"
+              value=""
+              onChange={(e) => handleMoveBook(book.id, e.target.value)}
+            >
+              <option value="" disabled>
+                Add to...
+              </option>
+              {/* Default Shelves */}
+              <option value="Read">Read</option>
+              <option value="Currently Reading">Currently Reading</option>
+              <option value="To Read">To Read</option>
+
+              {/* Custom Shelves */}
+              {customShelves.sort().map((shelf) => (
+                <option key={shelf} value={shelf}>
+                  {shelf}
+                </option>
+              ))}
+            </select>
+
             {/* PROGRESS */}
             {selectedShelf === "Currently Reading" && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 mt-4">
+                <p className="font-semibold mb-1">Progress:</p>
                 <input
                   type="number"
                   placeholder="Read"
@@ -244,8 +301,8 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
             )}
 
             {/* Review */}
-            <div className="mb-4">
-              <label className="block font-semibold mb-1">Review:</label>
+            <div className=" flex mb-4 mt-4">
+              <p className="font-semibold mb-1 text-left">Review:&ensp;</p>
               <textarea
                 className="w-full border border-gray-300 rounded p-2"
                 rows={3}
@@ -256,8 +313,8 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
             </div>
 
             {/* Quotes */}
-            <div className="mb-4">
-              <label className="block font-semibold mb-1">Quotes:</label>
+            <div className="flex flex-col mb-4">
+              <label className="font-semibold mb-1 text-left">Quotes:</label>
               {quotes.map((quote, index) => (
                 <div className="flex items-center" key={index}>
                   <input
@@ -284,13 +341,13 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
             </div>
 
             {/* Start of Reading Date */}
-            <div className="mb-4">
-              <label className="block font-semibold mb-1">
-                Start of Reading:
-              </label>
+            <div className="flex items-center mb-4">
+              <p className="font-semibold mb-1 text-left w-1/3">
+                Start of Reading:&ensp;
+              </p>
               <input
                 type="date"
-                className="w-full border border-gray-300 rounded p-2"
+                className="w-1/2 border border-gray-300 rounded p-2"
                 value={
                   startReadingDate instanceof Date &&
                   !isNaN(startReadingDate.getTime())
@@ -305,11 +362,13 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
             </div>
 
             {/* Date Read */}
-            <div className="mb-4">
-              <label className="block font-semibold mb-1">Date Read:</label>
+            <div className="flex items-center mb-4">
+              <p className="font-semibold mb-1 text-left w-1/3">
+                Date Read:&ensp;
+              </p>
               <input
                 type="date"
-                className="w-full border border-gray-300 rounded p-2"
+                className="w-1/2 border border-gray-300 rounded p-2"
                 value={
                   readDate instanceof Date && !isNaN(readDate.getTime())
                     ? readDate.toISOString().substring(0, 10)
@@ -329,7 +388,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
 
             {/* Conditional input for new re-read date */}
             {newRereadDate !== "" && (
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex gap-2 mb-4">
                 <input
                   type="date"
                   value={book.rereadDates}

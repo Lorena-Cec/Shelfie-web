@@ -6,7 +6,7 @@ export interface Book {
   addedDate: string;
   startReading?: string;
   readDate?: string;
-  rating?: number;
+  rating: number;
   pagesRead: number;
   pagesTotal: number;
   rereadDates: string[];

@@ -16,18 +16,12 @@ import DocumentModal from "./DocumentModal";
 interface ShelfDisplayProps {
   shelfName: string;
   books: Book[];
-  hoveredRatings?: { [key: string]: number | null };
-  setHoveredRatings: (prev: any) => void;
   handleUpdateBook: (id: string, field: string, value: any) => void;
-  handleDeleteBook: (id: string) => void;
-  handleMoveBook: (id: string, newShelf: string) => void;
 }
 
 const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
   shelfName,
   books = [],
-  hoveredRatings = {},
-  setHoveredRatings,
   handleUpdateBook,
 }) => {
   const [documentToView, setDocumentToView] = useState<string | null>(null);
@@ -147,24 +141,9 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
                     {Array.from({ length: 5 }, (_, index) => (
                       <img
                         key={index}
-                        src={`/stars${index < (hoveredRatings?.[book.id] ?? book.rating ?? 0) ? index + 1 : 0}.png`}
+                        src={`/stars${index < book.rating ? index + 1 : 0}.png`}
                         alt={`${index + 1} star`}
-                        className="w-7 h-7 cursor-pointer"
-                        onMouseEnter={() =>
-                          setHoveredRatings((prev: any) => ({
-                            ...prev,
-                            [book.id]: index + 1,
-                          }))
-                        }
-                        onMouseLeave={() =>
-                          setHoveredRatings((prev: any) => ({
-                            ...prev,
-                            [book.id]: null,
-                          }))
-                        }
-                        onClick={() =>
-                          handleUpdateBook(book.id, "rating", index + 1)
-                        }
+                        className="w-7 h-7"
                       />
                     ))}
                   </div>

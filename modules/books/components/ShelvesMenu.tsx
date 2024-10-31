@@ -6,14 +6,7 @@ import useShelves from "../hooks/useShelves";
 import ShelfDisplay from "./ShelfDisplay";
 import Link from "next/link";
 import { auth, db } from "@/lib/firebaseConfig";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  deleteDoc,
-  getDocs,
-  collection,
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
 const ShelvesMenu: React.FC = () => {
@@ -21,14 +14,12 @@ const ShelvesMenu: React.FC = () => {
     selectedShelf,
     setSelectedShelf,
     books,
-    handleDeleteBook,
-    handleMoveBook,
     handleUpdateBook,
-    hoveredRatings,
-    setHoveredRatings,
+    fetchAndSetShelves,
+    customShelves,
   } = useShelves();
 
-  const [customShelves, setCustomShelves] = useState<string[]>([]);
+  const [, setCustomShelves] = useState<string[]>([]);
   const [newShelfName, setNewShelfName] = useState("");
   const [isAddingShelf, setIsAddingShelf] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -38,6 +29,7 @@ const ShelvesMenu: React.FC = () => {
       if (user) {
         setUserId(user.uid);
         fetchAndSetShelves(user.uid);
+        console.log();
       } else {
         setUserId(null);
       }
@@ -56,26 +48,6 @@ const ShelvesMenu: React.FC = () => {
       console.log("Shelf created:", newShelfName);
     } else {
       console.log("Shelf already exists:", newShelfName);
-    }
-  };
-
-  const fetchAndSetShelves = async (userId: string) => {
-    try {
-      const shelvesCollectionRef = collection(db, "users", userId, "shelves");
-      const querySnapshot = await getDocs(shelvesCollectionRef);
-
-      if (querySnapshot.empty) {
-        console.log("No shelves found for user:", userId);
-        setCustomShelves([]);
-      } else {
-        const shelves = querySnapshot.docs.map((doc) => doc.id);
-        const noDefaultShelves = shelves.filter(
-          (shelf) => !["Read", "Currently Reading", "To Read"].includes(shelf)
-        );
-        setCustomShelves(noDefaultShelves);
-      }
-    } catch (error) {
-      console.error("Error fetching shelves:", error);
     }
   };
 
@@ -202,11 +174,7 @@ const ShelvesMenu: React.FC = () => {
       <ShelfDisplay
         shelfName={selectedShelf}
         books={books}
-        hoveredRatings={hoveredRatings}
-        setHoveredRatings={setHoveredRatings}
         handleUpdateBook={handleUpdateBook}
-        handleDeleteBook={handleDeleteBook}
-        handleMoveBook={handleMoveBook}
       />
       <ToastContainer />
     </div>

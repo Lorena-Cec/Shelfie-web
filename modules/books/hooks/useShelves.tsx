@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { auth, db } from "@/lib/firebaseConfig";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
@@ -16,6 +16,7 @@ const useShelves = () => {
   }>({});
   const router = useRouter();
   const { shelf } = router.query;
+  const [customShelves, setCustomShelves] = useState<string[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -42,6 +43,24 @@ const useShelves = () => {
       }
     } catch (error) {
       console.error("Error fetching books:", error);
+    }
+  };
+
+  const fetchBooksOnShelf = async (shelf: string) => {
+    if (!userId) return [];
+    try {
+      const shelfRef = doc(db, "users", userId, "shelves", shelf);
+      const shelfSnap = await getDoc(shelfRef);
+
+      if (shelfSnap.exists()) {
+        return shelfSnap.data().books || []; // Return the books instead of setting state
+      } else {
+        console.log("No such shelf!");
+        return []; // Return an empty array if no such shelf exists
+      }
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      return []; // Return an empty array in case of an error
     }
   };
 
@@ -82,8 +101,6 @@ const useShelves = () => {
 
   const handleMoveBook = async (bookId: string, newShelf: string) => {
     try {
-      await handleDeleteBook(bookId);
-
       const book = books.find((b: any) => b.id === bookId);
       if (!userId || !book) return;
 
@@ -232,6 +249,26 @@ const useShelves = () => {
     }
   };
 
+  const fetchAndSetShelves = async (userId: string) => {
+    try {
+      const shelvesCollectionRef = collection(db, "users", userId, "shelves");
+      const querySnapshot = await getDocs(shelvesCollectionRef);
+
+      if (querySnapshot.empty) {
+        console.log("No shelves found for user:", userId);
+        setCustomShelves([]);
+      } else {
+        const shelves = querySnapshot.docs.map((doc) => doc.id);
+        const noDefaultShelves = shelves.filter(
+          (shelf) => !["Read", "Currently Reading", "To Read"].includes(shelf)
+        );
+        setCustomShelves(noDefaultShelves);
+      }
+    } catch (error) {
+      console.error("Error fetching shelves:", error);
+    }
+  };
+
   return {
     selectedShelf,
     setSelectedShelf: handleShelfSelect,
@@ -247,6 +284,9 @@ const useShelves = () => {
     hoveredRatings,
     setHoveredRatings,
     handleSetBooks,
+    fetchAndSetShelves,
+    customShelves,
+    fetchBooksOnShelf,
   };
 };
 
