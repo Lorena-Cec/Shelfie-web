@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -62,7 +61,7 @@ const SearchPage = () => {
     <div className="flex flex-col min-h-screen bg-orange-700">
       <NavBar />
       <h1 className="text-2xl my-10 text-center text-brown-100">
-        Search Results for "{searchTerm}"
+        {searchTerm ? `Search Results for "${searchTerm}"` : "Search Books"}
       </h1>
       <div className="flex flex-col items-center px-32 mb-20 min-h-screen">
         {loading ? (

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import React from 'react';
-import NavBar from '@/components/NavBar';
-import ShelfButtons from '@/modules/books/components/ShelfButtons';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import axios from "axios";
+import React from "react";
+import NavBar from "@/components/NavBar";
+import ShelfButtons from "@/modules/books/components/ShelfButtons";
 
 interface Book {
   id: string;
@@ -34,7 +34,7 @@ const BookDetails = () => {
       );
       setMoreBooksByAuthor(response.data.items || []);
     } catch (error) {
-      console.error('Error fetching books by author:', error);
+      console.error("Error fetching books by author:", error);
     }
   };
 
@@ -45,7 +45,7 @@ const BookDetails = () => {
       );
       setRelatedBooks(response.data.items || []);
     } catch (error) {
-      console.error('Error fetching similar books:', error);
+      console.error("Error fetching similar books:", error);
     }
   };
 
@@ -67,7 +67,7 @@ const BookDetails = () => {
         fetchSimilarBooks(categories[0]);
       }
     } catch (error) {
-      console.error('Error fetching book details:', error);
+      console.error("Error fetching book details:", error);
     }
   };
 
@@ -117,16 +117,16 @@ const BookDetails = () => {
           <h1 className="text-4xl font-extrabold mb-2 text-brown-100">
             {title}
           </h1>
-          <p className="text-xl text-brown-200">By: {authors?.join(', ')}</p>
+          <p className="text-xl text-brown-200">By: {authors?.join(", ")}</p>
           <p className="text-md text-brown-300">
-            First published: {publishedDate || 'N/A'}
+            First published: {publishedDate || "N/A"}
           </p>
 
           {/* Book Description */}
           <div
             className=" mt-4 text-brown-200"
             dangerouslySetInnerHTML={{
-              __html: description || 'No description available',
+              __html: description || "No description available",
             }}
           />
           <div className="flex mt-10 ">
@@ -141,7 +141,7 @@ const BookDetails = () => {
                       {category},
                     </p>
                   ))
-                : 'N/A'}
+                : "N/A"}
             </div>
           </div>
         </div>

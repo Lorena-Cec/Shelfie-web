@@ -83,12 +83,15 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
   return (
     <div className="text-center mt-8 w-full">
       {books.length === 0 ? (
-        <p className="text-sm mt-4">
-          Add books to {shelfName} -{" "}
-          <a href="/browse" className="text-blue-500">
-            Browse here
-          </a>
-        </p>
+        <div>
+          <p className="p-2 mt-5 text-brown-100">Empty bookshelf.</p>
+          <p className="text-sm mb-5 text-brown-100">
+            Add books to {shelfName} -{" "}
+            <a href="/search" className="text-orange-300">
+              Browse here
+            </a>
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col gap-2 mt-4">
           <div

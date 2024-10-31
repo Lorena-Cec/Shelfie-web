@@ -56,10 +56,7 @@ const useShelves = () => {
   };
 
   useEffect(() => {
-    if (
-      shelf &&
-      (shelf === "Read" || shelf === "Currently Reading" || shelf === "To Read")
-    ) {
+    if (shelf) {
       setSelectedShelf(shelf as string);
     }
   }, [shelf, setSelectedShelf]);

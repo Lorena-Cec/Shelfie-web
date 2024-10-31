@@ -1,23 +1,23 @@
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect } from "react";
+import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
-} from 'firebase/auth';
-import { auth, db } from '../../../lib/firebaseConfig';
-import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../state/authSlice';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import GoogleAuthButton from './GoogleAuthButton';
-import { doc, setDoc } from 'firebase/firestore';
-import createShelvesForUser from '@/hooks/createShelvesForUser';
+} from "firebase/auth";
+import { auth, db } from "../../../lib/firebaseConfig";
+import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { setUser } from "../state/authSlice";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import GoogleAuthButton from "./GoogleAuthButton";
+import { doc, setDoc } from "firebase/firestore";
+import createShelvesForUser from "@/hooks/createShelvesForUser";
 
 const RegisterForm = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
   const dispatch = useDispatch();
   const [rememberMe, setRememberMe] = useState(false);
@@ -33,11 +33,11 @@ const RegisterForm = () => {
       const user = userCredential.user;
       const userData = {
         uid: userCredential.user.uid,
-        email: userCredential.user.email || '',
-        displayName: userCredential.user.displayName || 'User',
+        email: userCredential.user.email || "",
+        displayName: userCredential.user.displayName || "User",
       };
 
-      await setDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, "users", user.uid), {
         name,
         email,
       });
@@ -46,17 +46,18 @@ const RegisterForm = () => {
 
       dispatch(setUser(userData)); //firebase persistence auth
       if (rememberMe) {
-        localStorage.setItem('rememberedEmail', email);
+        localStorage.setItem("rememberedEmail", email);
       }
       await sendEmailVerification(user);
-      router.push('/auth/verification');
+      router.push("/auth/verification");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error('Error during registration. Please try again.');
+      toast.error("Error during registration. Please try again.");
     }
   };
 
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
     if (rememberedEmail) {
       setEmail(rememberedEmail);
       setRememberMe(true);
@@ -74,10 +75,10 @@ const RegisterForm = () => {
             Create new Account
           </h2>
           <p className="text-sm text-brown-100 text-center mb-6">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <button
               type="button"
-              onClick={() => router.push('login')}
+              onClick={() => router.push("login")}
               className="text-brown-100 underline"
             >
               Login here
