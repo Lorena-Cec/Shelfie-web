@@ -30,7 +30,7 @@ const NavBar = () => {
     { name: "Profile", link: "/profile" },
     { name: "Reading Challenge", link: "/challenge" },
     { name: "Quotes", link: "/quotes" },
-    { name: "Logout", link: "/profile" },
+    { name: "Logout", link: "/" },
   ];
 
   const handleOptionSelect = (options: any) => {

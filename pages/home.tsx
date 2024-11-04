@@ -32,16 +32,12 @@ const Home: React.FC = () => {
 
   const listTypes = [
     "combined-print-and-e-book-fiction",
-    "graphic-books-and-manga",
     "trade-fiction-paperback",
-    "young-adult-hardcover",
   ];
 
   const listTitleMap: { [key: string]: string } = {
     "combined-print-and-e-book-fiction": "Current Book Ranking",
-    "graphic-books-and-manga": "Graphic Novels",
     "trade-fiction-paperback": "Readers Choice",
-    "young-adult-hardcover": "Young Adult Favorites",
   };
 
   const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<any[]>([]);
@@ -59,38 +55,69 @@ const Home: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const fetchNytBooks = async () => {
-      setLoading(true);
-      setError(null);
-      const fetchedBooks: BookList[] = [];
-
+    const fetchBooksByType = async (listType: string) => {
       try {
-        const storedBooks = localStorage.getItem("nytBooks");
-        if (storedBooks) {
-          setBooksByList(JSON.parse(storedBooks));
-        } else {
-          for (const listType of listTypes) {
-            const response = await axios.get(
-              `/api/nytBooks?listType=${listType}`
-            );
-            const limitedBooks = response.data.slice(0, 10);
-            fetchedBooks.push({ listType, books: limitedBooks });
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
+        const response = await axios.get(`/api/nytBooks?listType=${listType}`);
+        const limitedBooks = response.data.slice(0, 7);
 
-          localStorage.setItem("nytBooks", JSON.stringify(fetchedBooks));
-          setBooksByList(fetchedBooks);
-        }
+        setBooksByList((prevLists) => {
+          const isDuplicate = prevLists.some(
+            (existingList) => existingList.listType === listType
+          );
+          const updatedLists = isDuplicate
+            ? prevLists
+            : [...prevLists, { listType, books: limitedBooks }];
+
+          localStorage.setItem("nytBooks", JSON.stringify(updatedLists));
+          return updatedLists;
+        });
       } catch (err) {
-        console.error(err);
+        console.error(`Error fetching books for ${listType}:`, err);
         setError("Failed to fetch books");
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchNytBooks();
-  }, []);
+    const fetchAllBooks = async () => {
+      setLoading(true);
+      setError(null);
+
+      for (const listType of listTypes) {
+        if (
+          !booksByList.some(
+            (existingList) => existingList.listType === listType
+          )
+        ) {
+          await fetchBooksByType(listType);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      }
+
+      setLoading(false);
+    };
+
+    const checkAndFetchBooks = () => {
+      const storedData = localStorage.getItem("nytBooks");
+      const lastFetchTime = localStorage.getItem("lastFetchTime");
+
+      const now = new Date().getTime();
+      const fiveDaysInMs = 5 * 24 * 60 * 60 * 1000;
+
+      if (
+        storedData &&
+        lastFetchTime &&
+        now - parseInt(lastFetchTime) < fiveDaysInMs
+      ) {
+        setBooksByList(JSON.parse(storedData));
+      } else {
+        fetchAllBooks();
+        localStorage.setItem("lastFetchTime", now.toString());
+      }
+    };
+
+    checkAndFetchBooks();
+  }, [listTypes]);
+
+  console.log(booksByList);
 
   useEffect(() => {
     const fetchCurrentlyReadingBooks = async () => {
@@ -251,7 +278,7 @@ const Home: React.FC = () => {
 
                 <div className="">
                   <div className="pl-32">
-                    {list.listType === "graphic-books-and-manga" && (
+                    {list.listType === "trade-fiction-paperback" && (
                       <Swiper
                         modules={[Navigation]}
                         spaceBetween={40}
@@ -305,8 +332,7 @@ const Home: React.FC = () => {
                   </div>
 
                   <div className="px-32 flex justify-between">
-                    {(list.listType === "combined-print-and-e-book-fiction" ||
-                      list.listType === "trade-fiction-paperback") &&
+                    {list.listType === "combined-print-and-e-book-fiction" &&
                       list.books.slice(0, 7).map((book: Book) => (
                         <a
                           href={`/book/${book.primary_isbn13}`}
@@ -338,39 +364,6 @@ const Home: React.FC = () => {
                           </p>
                         </a>
                       ))}
-                  </div>
-
-                  <div className="p-0">
-                    {list.listType === "young-adult-hardcover" && (
-                      <div className="bg-orange-700 flex w-full gap-4 py-16 px-32 items-start">
-                        {list.listType === "young-adult-hardcover" &&
-                          list.books.slice(0, 8).map((book: Book) => (
-                            <a
-                              href={`/book/${book.primary_isbn13}`}
-                              className="flex flex-col items-center text-center gap-2 w-1/4"
-                              key={book.primary_isbn13}
-                            >
-                              {book.book_image ? (
-                                <img
-                                  src={book.book_image}
-                                  alt={book.title}
-                                  className="w-36 h-52 bg-orange-100 shadow-3xl mb-4"
-                                />
-                              ) : (
-                                <div className="w-36 h-52 object-cover bg-gray-200 shadow-3xl mb-4 flex items-center justify-center">
-                                  <p>No Image Available</p>
-                                </div>
-                              )}
-                              <p className="text-brown-200 font-bold text-lg">
-                                {book.title || "No Title Available"}
-                              </p>
-                              <p className="text-brown-200 font-thin">
-                                {book.author || "No Author Available"}
-                              </p>
-                            </a>
-                          ))}
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

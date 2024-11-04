@@ -64,9 +64,9 @@ const ProfileSetup: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-orange-700">
+    <div className="flex flex-col min-h-full bg-orange-700 overflow-auto">
       <NavNewUser currentPage={1} />
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center bg-orange-700">
         <div className="flex flex-col gap-3 items-start mt-20 mb-5 w-0.3">
           <p className="text-brown-100 open-sans text-2xl">
             Setup your profile
@@ -122,6 +122,7 @@ const ProfileSetup: React.FC = () => {
 
             <div className="relative">
               <button
+                type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="w-full text-brown-100 px-4 py-2 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-orange-400 text-left"
               >
