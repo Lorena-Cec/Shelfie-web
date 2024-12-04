@@ -108,14 +108,12 @@ const ShelvesMenu: React.FC = () => {
           </Link>
         ))}
       </div>
-      {/* Add New Shelf Icon */}
       <button
         onClick={() => setIsAddingShelf(!isAddingShelf)}
         className="text-brown-100 px-4 py-4 hover:text-orange-300"
       >
         <FaPlus size={20} />
       </button>
-      {/* Input for Adding Custom Shelf */}
       {isAddingShelf && (
         <div className="flex items-center mt-4 text-brown-100">
           <input

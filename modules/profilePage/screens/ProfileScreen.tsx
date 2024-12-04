@@ -8,6 +8,7 @@ import NavBar from "@/components/NavBar";
 import { ProfileData, useFirestore } from "@/modules/profilePage";
 import { Autoplay } from "swiper/modules";
 import { doc, getDoc } from "firebase/firestore";
+import Link from "next/link";
 
 const Profile: React.FC = () => {
   const {
@@ -25,6 +26,7 @@ const Profile: React.FC = () => {
   const [readBooks, setReadBooks] = useState([]);
   const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<any[]>([]);
   const [recentBook, setRecentBook] = useState<any>(null);
+  const [favoriteBooks, setFavoriteBooks] = useState<any[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -71,6 +73,31 @@ const Profile: React.FC = () => {
     fetchCurrentlyReadingBooks();
   }, [userId]);
 
+  useEffect(() => {
+    const fetchFavoriteBooks = async () => {
+      if (!userId) return;
+
+      try {
+        const shelfRef = doc(db, "users", userId, "shelves", "Read");
+        const shelfSnap = await getDoc(shelfRef);
+
+        if (shelfSnap.exists()) {
+          const booksWithBestRating = (shelfSnap.data().books || []).filter(
+            (book: { rating: number }) => book.rating === 5
+          );
+          setFavoriteBooks(booksWithBestRating);
+        } else {
+          console.log("No such shelf!");
+          setFavoriteBooks([]);
+        }
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      }
+    };
+
+    fetchFavoriteBooks();
+  }, [userId]);
+
   const fetchData = async () => {
     if (!userId) return;
     const fetchedReadBooks = await getReadBooksThisYear(userId);
@@ -111,7 +138,7 @@ const Profile: React.FC = () => {
 
     if (!docSnap.exists()) {
       console.log("No such document!");
-      return null; // Return null if there's no document
+      return null;
     }
 
     const data = docSnap.data();
@@ -151,7 +178,7 @@ const Profile: React.FC = () => {
       <NavBar></NavBar>
       <div className="flex mt-20">
         {/* LEFT SIDE */}
-        <div className="flex flex-col items-center w-1/4 pl-32">
+        <div className="flex flex-col items-center w-1/4 pl-48">
           {/* Profile Image */}
           <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden mb-4">
             <input
@@ -219,23 +246,32 @@ const Profile: React.FC = () => {
         </div>
 
         {/* CENTER CONTENT */}
-        <div className="flex flex-col items-center w-1/2">
+        <div className="flex flex-col w-2/5 pl-16 pr-28">
           {/* Personal Info */}
           <h1 className="text-3xl font-bold">{profileData.name}</h1>
+          <hr className="w-full h-1 bg-brown-100 mb-5"></hr>
           <p>
-            {profileData.city}, {profileData.country}
+            {profileData.city} {profileData.country}
           </p>
-          <p className="my-4 text-gray-600">{profileData.aboutMe}</p>
+          <p className="mt-2">My goals: {profileData.goals}</p>
+          <p className="mt-2">Favorite genres: {profileData.genres}</p>
+          <p className="mt-2">{profileData.aboutMe}</p>
 
           {/* Hobbies */}
           <h3 className="font-semibold text-lg mt-4">Hobbies</h3>
-          <p>{profileData.hobbies?.join(", ") || "Add your hobbies"}</p>
+          <p className="mt-2">
+            {profileData.hobbies?.join(", ") || "Add your hobbies"}
+          </p>
 
           {/* Favorites */}
-          <h3 className="font-semibold text-lg mt-4">Favorite Books</h3>
-          <div className="flex gap-4 flex-wrap">
-            {profileData.favoriteBooks?.map((book) => (
-              <div key={book.id} className="w-24 h-32 bg-gray-200">
+          <div className="flex justify-between mt-10 items-center">
+            <h3 className="font-semibold text-lg">Favorite Books</h3>
+            <Link href="shelves/Read">See more</Link>
+          </div>
+          <hr className="w-full h-1 bg-brown-100 mb-5"></hr>
+          <div className="flex gap-5 items-center justify-center">
+            {favoriteBooks?.slice(0, 6).map((book) => (
+              <div key={book.id} className="w-20 h-32 bg-gray-200">
                 <img
                   src={book.image}
                   alt={book.title}
@@ -246,7 +282,8 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Recent Updates */}
-          <h3 className="font-semibold text-lg mt-4">Recent Updates</h3>
+          <h3 className="font-semibold text-lg mt-10">Recent Updates</h3>
+          <hr className="w-full h-1 bg-brown-100 mb-5"></hr>
           <ul>
             {profileData.recentUpdates?.slice(0, 5).map((update, index) => (
               <li key={index} className="text-gray-700">
@@ -258,11 +295,11 @@ const Profile: React.FC = () => {
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="flex flex-col w-1/3 pr-32">
+        <div className="flex flex-col w-1/3 pr-48">
           {/* Reading Challenge */}
           <div className="flex flex-col items-center w-full">
             <div className="bg-orange-300 flex py-5 gap-10 items-center w-full justify-center">
-              <img src="/wallpaper.png" alt="Book" className="w-32" />
+              <img src="/book.png" alt="Book" className="w-32" />
               <p className="text-brown-100 font-extrabold tracking-tighter text-3xl w-80">
                 Challenge yourself this year!
               </p>
@@ -278,7 +315,7 @@ const Profile: React.FC = () => {
 
             <a
               className="rounded text-white text-center bg-orange-300 w-full py-4"
-              href="/"
+              href="/challenge"
             >
               View Read Books
             </a>

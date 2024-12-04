@@ -6,6 +6,8 @@ export interface ProfileData {
   aboutMe?: string;
   hobbies?: string[];
   booksToRead?: number;
+  goals?: string[];
+  genres?: string[];
   friends?: string[];
   favoriteBooks?: Book[];
   recentUpdates?: Update[];

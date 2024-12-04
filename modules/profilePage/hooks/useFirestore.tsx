@@ -24,6 +24,8 @@ export const useFirestore = () => {
         aboutMe: profileInfo.aboutMe || "",
         hobbies: profileInfo.hobbies || [],
         booksToRead: profileInfo.booksToRead || 0,
+        goals: profileInfo.goals || "",
+        genres: profileInfo.genres || "",
         friends: profileInfo.friends || [],
         favoriteBooks: profileInfo.favoriteBooks || [],
         recentUpdates: profileInfo.recentUpdates || [],

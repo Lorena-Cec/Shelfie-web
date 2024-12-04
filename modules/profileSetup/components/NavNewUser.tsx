@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
 interface NavigationProps {
   currentPage: number;
@@ -7,9 +7,9 @@ interface NavigationProps {
 
 const NavNewUser: React.FC<NavigationProps> = ({ currentPage }) => {
   const pages = [
-    { pageNumber: '01', label: 'Profile Setup', link: '/setup/profileSetup' },
-    { pageNumber: '02', label: 'Set your Goals', link: '/setup/goalsSetup' },
-    { pageNumber: '03', label: 'Select Genres', link: '/setup/genreSelect' },
+    { pageNumber: "01", label: "Profile Setup", link: "/setup/profileSetup" },
+    { pageNumber: "02", label: "Set your Goals", link: "/setup/goalsSetup" },
+    { pageNumber: "03", label: "Select Genres", link: "/setup/genreSelect" },
   ];
 
   return (
@@ -22,13 +22,13 @@ const NavNewUser: React.FC<NavigationProps> = ({ currentPage }) => {
           <div key={page.pageNumber} className="flex gap-4 items-center">
             <Link href={page.link}>
               <p
-                className={`${currentPage === index + 1 ? 'text-orange-100 font-extrabold' : 'font-normal'}`}
+                className={`${currentPage === index + 1 ? "text-orange-100 font-extrabold" : "font-normal"}`}
               >
                 {page.pageNumber} {page.label}
               </p>
             </Link>
 
-            <div className={`${index + 1 === pages.length ? 'hidden' : ''}`}>
+            <div className={`${index + 1 === pages.length ? "hidden" : ""}`}>
               <svg
                 width="16"
                 height="16"

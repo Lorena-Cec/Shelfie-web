@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -46,7 +47,6 @@ const SearchPage = () => {
           },
         });
         setBooks(response.data.items || []);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setError("Failed to fetch books");
       } finally {
@@ -58,7 +58,7 @@ const SearchPage = () => {
   }, [searchType, searchTerm, user]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-orange-700">
+    <div className="flex flex-col min-h-screen bg-brown-700">
       <NavBar />
       <h1 className="text-2xl my-10 text-center text-brown-100">
         {searchTerm ? `Search Results for "${searchTerm}"` : "Search Books"}

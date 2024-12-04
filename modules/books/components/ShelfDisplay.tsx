@@ -104,7 +104,7 @@ const ShelfDisplay: React.FC<ShelfDisplayProps> = ({
             <p>ADDED DATE</p>
             <p>START OF READING</p>
             <p>READ DATE</p>
-            <p>E-BOOK</p> {/* New E-BOOK Column */}
+            <p>E-BOOK</p>
             <div></div>
           </div>
 

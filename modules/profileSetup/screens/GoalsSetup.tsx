@@ -86,7 +86,7 @@ const GoalsSetup: React.FC = () => {
           className="space-y-3 w-0.3 bg-white border border-orange-400 rounded-lg mb-20"
         >
           <div className="bg-orange-300 flex py-5 gap-10 items-center justify-center">
-            <img src="/wallpaper.png" alt="Book" className="w-32" />
+            <img src="/book.png" alt="Book" className="w-32" />
             <p className="text-brown-100 font-extrabold tracking-tighter text-4xl w-80">
               Challenge yourself this year!
             </p>

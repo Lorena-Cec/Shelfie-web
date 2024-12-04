@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable react/no-unescaped-entities */
+import React, { useEffect, useState } from "react";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-} from 'firebase/auth';
-import { auth } from '../../../lib/firebaseConfig';
-import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../state/authSlice';
-import GoogleAuthButton from './GoogleAuthButton';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+} from "firebase/auth";
+import { auth } from "../../../lib/firebaseConfig";
+import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { setUser } from "../state/authSlice";
+import GoogleAuthButton from "./GoogleAuthButton";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
   const dispatch = useDispatch();
   const [rememberMe, setRememberMe] = useState(false);
@@ -28,13 +29,13 @@ const LoginForm = () => {
       );
       const userData = {
         uid: userCredential.user.uid,
-        email: userCredential.user.email || '',
-        displayName: userCredential.user.displayName || 'User',
+        email: userCredential.user.email || "",
+        displayName: userCredential.user.displayName || "User",
       };
 
       dispatch(setUser(userData));
       if (rememberMe) {
-        localStorage.setItem('rememberedEmail', email);
+        localStorage.setItem("rememberedEmail", email);
       }
       toast.success(
         <div className="flex gap-4 items-center">
@@ -50,8 +51,9 @@ const LoginForm = () => {
         }
       );
       setTimeout(() => {
-        router.push('/home');
+        router.push("/home");
       }, 1000);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(
         <div className="flex gap-4 items-center">
@@ -71,21 +73,21 @@ const LoginForm = () => {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      toast.error('Please enter your email address');
+      toast.error("Please enter your email address");
       return;
     }
 
     try {
       await sendPasswordResetEmail(auth, email);
-      toast.success('Password reset email sent! Check your inbox.');
+      toast.success("Password reset email sent! Check your inbox.");
     } catch (error) {
-      console.error('Error sending password reset email', error);
-      toast.error('Error sending password reset email');
+      console.error("Error sending password reset email", error);
+      toast.error("Error sending password reset email");
     }
   };
 
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
     if (rememberedEmail) {
       setEmail(rememberedEmail);
       setRememberMe(true);
@@ -93,7 +95,7 @@ const LoginForm = () => {
   }, []);
 
   return (
-    <div className="max-h-screen bg-yellow-200 flex flex-col ">
+    <div className="max-h-screen bg-orange-600 flex flex-col ">
       <div className="flex justify-between gap-10 items-center">
         <div className="flex flex-col items-center w-3/5 p-10">
           <h1 className="text-4xl text-center mb-28 -mt-20 text-brown-100 font-extrabold tracking-tighter">
@@ -104,10 +106,10 @@ const LoginForm = () => {
           </h2>
           <form onSubmit={handleLogin} className="space-y-3 w-80">
             <p className="text-sm text-brown-100 text-center">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <button
                 type="button"
-                onClick={() => router.push('register')}
+                onClick={() => router.push("register")}
                 className="text-brown-100 underline mb-4"
               >
                 Register
@@ -154,7 +156,7 @@ const LoginForm = () => {
             <p className="text-brown-100 text-xs text-center">or</p>
             <GoogleAuthButton isLogin={true} />
             <p className="text-sm text-brown-100">
-              Forgot{' '}
+              Forgot{" "}
               <button
                 type="button"
                 onClick={handleForgotPassword}

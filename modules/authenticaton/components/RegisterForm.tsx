@@ -44,7 +44,7 @@ const RegisterForm = () => {
 
       await createShelvesForUser(user.uid);
 
-      dispatch(setUser(userData)); //firebase persistence auth
+      dispatch(setUser(userData));
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", email);
       }
@@ -65,7 +65,7 @@ const RegisterForm = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-yellow-200 flex flex-col ">
+    <div className="min-h-screen bg-orange-600 flex flex-col ">
       <div className="flex justify-between gap-10 items-center">
         <div className="flex flex-col items-center w-3/5 p-10">
           <h1 className="text-4xl text-center mb-28 -mt-20 text-brown-100 font-extrabold tracking-tighter">

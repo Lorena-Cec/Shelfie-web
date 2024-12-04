@@ -1,44 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import NavNewUser from '@/modules/profileSetup/components/NavNewUser';
-import { useRouter } from 'next/router';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebaseConfig';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useEffect, useState } from "react";
+import NavNewUser from "@/modules/profileSetup/components/NavNewUser";
+import { useRouter } from "next/router";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebaseConfig";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const GenreSelect: React.FC = () => {
   const [genres, setGenres] = useState<string[]>([]);
   const router = useRouter();
 
   const allGenres = [
-    'Fantasy',
-    'Science Fiction',
-    'Dystopian',
-    'Action',
-    'Adventure',
-    'Mystery',
-    'Thriller',
-    'Romance',
-    'Horror',
-    'Historical Fiction',
-    'Children’s Fiction',
-    'Women’s Fiction',
-    'Contemporary Fiction',
-    'Literary Fiction',
-    'Manga',
-    'Autobiography',
-    'Biography',
-    'History',
-    'Food & Drink',
-    'Poetry',
-    'Self-Help',
-    'True Crime',
-    'Travel',
-    'Art',
-    'Photography',
-    'Essays',
-    'Social Sciences',
-    'Science & Technology',
+    "Fantasy",
+    "Science Fiction",
+    "Dystopian",
+    "Action",
+    "Adventure",
+    "Mystery",
+    "Thriller",
+    "Romance",
+    "Horror",
+    "Historical Fiction",
+    "Children’s Fiction",
+    "Women’s Fiction",
+    "Contemporary Fiction",
+    "Literary Fiction",
+    "Manga",
+    "Autobiography",
+    "Biography",
+    "History",
+    "Food & Drink",
+    "Poetry",
+    "Self-Help",
+    "True Crime",
+    "Travel",
+    "Art",
+    "Photography",
+    "Essays",
+    "Social Sciences",
+    "Science & Technology",
   ].sort();
 
   useEffect(() => {
@@ -57,8 +57,8 @@ const GenreSelect: React.FC = () => {
     e.preventDefault();
 
     if (genres.length === 0) {
-      toast.error('You must select at least one genre!', {
-        position: 'top-right',
+      toast.error("You must select at least one genre!", {
+        position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
@@ -72,7 +72,7 @@ const GenreSelect: React.FC = () => {
     const user = auth.currentUser;
     if (user) {
       await setDoc(
-        doc(db, 'users', user.uid),
+        doc(db, "users", user.uid),
         {
           ProfileInfo: {
             genres: genres,
@@ -80,7 +80,7 @@ const GenreSelect: React.FC = () => {
         },
         { merge: true }
       );
-      router.push('/home');
+      router.push("/home");
     }
   };
 
@@ -115,12 +115,12 @@ const GenreSelect: React.FC = () => {
                     onClick={() => toggleGenre(genre)}
                     className={`flex items-center p-2 cursor-pointer rounded-lg ${
                       genres.includes(genre)
-                        ? 'bg-orange-200'
-                        : 'hover:bg-orange-400'
+                        ? "bg-orange-200"
+                        : "hover:bg-orange-400"
                     }`}
                   >
                     <p
-                      className={`text-brown-100 whitespace-nowrap ${genres.includes(genre) ? 'text-white' : ''}`}
+                      className={`text-brown-100 whitespace-nowrap ${genres.includes(genre) ? "text-white" : ""}`}
                     >
                       {genre}
                     </p>

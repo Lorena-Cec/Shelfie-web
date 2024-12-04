@@ -1,7 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import axios, { AxiosError } from 'axios';
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { NextApiRequest, NextApiResponse } from "next";
+import axios, { AxiosError } from "axios";
 
-const NYT_API_URL = 'https://api.nytimes.com/svc/books/v3/lists/current/';
+const NYT_API_URL = "https://api.nytimes.com/svc/books/v3/lists/current/";
 const MAX_RETRIES = 5;
 const BASE_DELAY = 1000;
 
@@ -13,7 +15,7 @@ export default async function handler(
   const listType = req.query.listType;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'Missing API key' });
+    return res.status(500).json({ error: "Missing API key" });
   }
 
   const fetchBooks = async (
@@ -23,7 +25,7 @@ export default async function handler(
     try {
       const response = await axios.get(`${NYT_API_URL}${listType}.json`, {
         params: {
-          'api-key': apiKey,
+          "api-key": apiKey,
         },
       });
       return response.data.results.books;
@@ -34,9 +36,9 @@ export default async function handler(
           await new Promise((resolve) => setTimeout(resolve, waitTime));
           return fetchBooks(listType, retries + 1);
         }
-        console.error('Error fetching data from NYT API:', error.message);
+        console.error("Error fetching data from NYT API:", error.message);
       } else {
-        console.error('Unexpected error fetching data from NYT API:', error);
+        console.error("Unexpected error fetching data from NYT API:", error);
       }
       throw error;
     }
@@ -48,11 +50,11 @@ export default async function handler(
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
       res.status(500).json({
-        error: 'Error fetching data from NYT API',
+        error: "Error fetching data from NYT API",
         message: error.message,
       });
     } else {
-      res.status(500).json({ error: 'Error fetching data from NYT API' });
+      res.status(500).json({ error: "Error fetching data from NYT API" });
     }
   }
 }

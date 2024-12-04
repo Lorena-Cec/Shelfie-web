@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { sendEmailVerification, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../lib/firebaseConfig';
-import { useRouter } from 'next/router';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useEffect, useState } from "react";
+import { sendEmailVerification, onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../lib/firebaseConfig";
+import { useRouter } from "next/router";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const VerifyPage = () => {
   const [isSending, setIsSending] = useState(false);
@@ -15,12 +16,12 @@ const VerifyPage = () => {
     try {
       if (auth.currentUser) {
         await sendEmailVerification(auth.currentUser);
-        toast.success('Verification email sent. Please check your inbox.');
+        toast.success("Verification email sent. Please check your inbox.");
       } else {
-        toast.error('Error: User not found.');
+        toast.error("Error: User not found.");
       }
     } catch (error) {
-      toast.error('Error sending verification email. Please try again.');
+      toast.error("Error sending verification email. Please try again.");
     } finally {
       setIsSending(false);
     }
@@ -30,8 +31,8 @@ const VerifyPage = () => {
     if (auth.currentUser) {
       await auth.currentUser.reload();
       if (auth.currentUser.emailVerified) {
-        toast.success('Your email has been verified!');
-        router.push('/setup/profileSetup');
+        toast.success("Your email has been verified!");
+        router.push("/setup/profileSetup");
       }
     }
   };
@@ -56,7 +57,7 @@ const VerifyPage = () => {
   }, []);
 
   const handleVerifyLater = () => {
-    router.push('/setup/profileSetup');
+    router.push("/setup/profileSetup");
   };
 
   return (
@@ -71,15 +72,15 @@ const VerifyPage = () => {
         <p className="text-brown-100 text-center mb-4">
           {userEmail
             ? `We have sent an email to ${userEmail}. Follow the link in the mail to verify your address.`
-            : 'Loading...'}
+            : "Loading..."}
         </p>
 
         <button
-          className={`bg-orange-100 text-white font-bold py-2 px-4 rounded w-full transition-colors mb-4 ${isSending ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`bg-orange-100 text-white font-bold py-2 px-4 rounded w-full transition-colors mb-4 ${isSending ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={handleResendEmail}
           disabled={isSending}
         >
-          {isSending ? 'Sending...' : 'Resend email'}
+          {isSending ? "Sending..." : "Resend email"}
         </button>
 
         <button

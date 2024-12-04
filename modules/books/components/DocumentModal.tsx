@@ -45,14 +45,9 @@ const DocumentModal: React.FC<DocumentModalProps> = ({
           });
 
           await newBook.loaded;
-
           await newBook.loaded.navigation;
-
-          console.log("Spine content:", newBook.spine);
-
           let sectionCount = 0;
           newBook.spine.each(() => sectionCount++);
-          console.log("Total sections:", sectionCount);
 
           if (rendition) rendition.destroy();
 

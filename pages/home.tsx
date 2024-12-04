@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import NavBar from "@/components/NavBar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
@@ -30,10 +30,10 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const listTypes = [
-    "combined-print-and-e-book-fiction",
-    "trade-fiction-paperback",
-  ];
+  const listTypes = useMemo(
+    () => ["combined-print-and-e-book-fiction", "trade-fiction-paperback"],
+    []
+  );
 
   const listTitleMap: { [key: string]: string } = {
     "combined-print-and-e-book-fiction": "Current Book Ranking",
@@ -61,13 +61,14 @@ const Home: React.FC = () => {
         const limitedBooks = response.data.slice(0, 7);
 
         setBooksByList((prevLists) => {
-          const isDuplicate = prevLists.some(
-            (existingList) => existingList.listType === listType
-          );
-          const updatedLists = isDuplicate
-            ? prevLists
-            : [...prevLists, { listType, books: limitedBooks }];
+          if (prevLists.some((list) => list.listType === listType)) {
+            return prevLists;
+          }
 
+          const updatedLists = [
+            ...prevLists,
+            { listType, books: limitedBooks },
+          ];
           localStorage.setItem("nytBooks", JSON.stringify(updatedLists));
           return updatedLists;
         });
@@ -81,43 +82,38 @@ const Home: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      for (const listType of listTypes) {
-        if (
-          !booksByList.some(
-            (existingList) => existingList.listType === listType
-          )
-        ) {
-          await fetchBooksByType(listType);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-
-      setLoading(false);
-    };
-
-    const checkAndFetchBooks = () => {
       const storedData = localStorage.getItem("nytBooks");
       const lastFetchTime = localStorage.getItem("lastFetchTime");
-
       const now = new Date().getTime();
-      const fiveDaysInMs = 5 * 24 * 60 * 60 * 1000;
 
       if (
         storedData &&
         lastFetchTime &&
-        now - parseInt(lastFetchTime) < fiveDaysInMs
+        now - parseInt(lastFetchTime) < 5 * 24 * 60 * 60 * 1000
       ) {
-        setBooksByList(JSON.parse(storedData));
-      } else {
-        fetchAllBooks();
-        localStorage.setItem("lastFetchTime", now.toString());
+        try {
+          const parsedData = JSON.parse(storedData);
+          if (Array.isArray(parsedData)) {
+            setBooksByList(parsedData);
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Error parsing storedData:", error);
+        }
       }
+
+      for (const listType of listTypes) {
+        await fetchBooksByType(listType);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      localStorage.setItem("lastFetchTime", now.toString());
+      setLoading(false);
     };
 
-    checkAndFetchBooks();
+    fetchAllBooks();
   }, [listTypes]);
-
-  console.log(booksByList);
 
   useEffect(() => {
     const fetchCurrentlyReadingBooks = async () => {
@@ -151,8 +147,6 @@ const Home: React.FC = () => {
     pagesRead: number,
     totalPages: number
   ) => {
-    console.log(pagesRead);
-    console.log(totalPages);
     if (totalPages === 0 || pagesRead === 0) return 100;
     return Math.max(0, ((totalPages - pagesRead) / totalPages) * 100);
   };
