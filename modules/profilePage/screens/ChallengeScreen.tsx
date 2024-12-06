@@ -1,15 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import { ProfileData, useFirestore } from "@/modules/profilePage";
 import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import DonutChart from "../components/DonutChart";
+import PagesChart from "../components/PagesChart";
+import RatingPieChart from "../components/RatingsChart";
 
 const ChallengeScreen: React.FC = () => {
   const { getProfileData, getReadBooksThisYear } = useFirestore();
   const [profileData, setProfileData] = useState<ProfileData>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [readBooks, setReadBooks] = useState([]);
+  const [pagesRead, setPagesRead] = useState<number>(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -32,6 +36,20 @@ const ChallengeScreen: React.FC = () => {
     if (!userId) return;
     const fetchedReadBooks = await getReadBooksThisYear(userId);
     setReadBooks(fetchedReadBooks);
+
+    const totalPages = fetchedReadBooks.reduce(
+      (
+        total: any,
+        book: {
+          pagesTotal: any;
+        }
+      ) => {
+        return total + (book.pagesTotal || 0); // Ako nema pageCount, dodaj 0
+      },
+      0
+    );
+    setPagesRead(totalPages);
+
     const data = await getProfileData(userId);
     if (data) {
       setProfileData(data);
@@ -53,10 +71,14 @@ const ChallengeScreen: React.FC = () => {
         </div>
         <div className="bg-orange-700 w-full h-16 flex items-center flex-col"></div>
       </div>
-      <DonutChart
-        booksRead={readBooks.length}
-        readingGoal={profileData.booksToRead ?? 0}
-      />
+      <div className="flex">
+        <DonutChart
+          booksRead={readBooks.length}
+          readingGoal={profileData.booksToRead ?? 0}
+        />
+        <PagesChart pagesRead={pagesRead} />
+        <RatingPieChart readBooks={readBooks} />
+      </div>
     </div>
   );
 };
