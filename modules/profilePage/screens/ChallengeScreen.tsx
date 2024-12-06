@@ -3,6 +3,7 @@ import NavBar from "@/components/NavBar";
 import { ProfileData, useFirestore } from "@/modules/profilePage";
 import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import DonutChart from "../components/DonutChart";
 
 const ChallengeScreen: React.FC = () => {
   const { getProfileData, getReadBooksThisYear } = useFirestore();
@@ -38,31 +39,24 @@ const ChallengeScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-orange-700 text-brown-100">
+    <div className="min-h-screen bg-brown-700 text-brown-100">
       <NavBar></NavBar>
       {/* Reading Challenge */}
       <div className="flex flex-col items-center w-full">
-        <div className="bg-orange-300 flex py-5 gap-10 items-center w-full justify-center">
-          <p className="text-brown-100 font-extrabold tracking-tighter text-5xl">
-            YOUR YEAR IN BOOKS SO FAR
-          </p>
+        <div className="bg-orange-300 w-full">
+          <div className="flex py-5 gap-10 items-center w-full justify-center">
+            <img src="book.png" alt="Open book" className="w-40 h-auto" />
+            <p className="text-brown-100 font-extrabold tracking-tighter text-5xl">
+              Reading <br></br> Challenge
+            </p>
+          </div>
         </div>
-        <div className="bg-brown-700 w-full flex items-center flex-col">
-          <p>{profileData.name} has read</p>
-          <p className="text-5xl font-bold">
-            {" "}
-            {readBooks.length} / {profileData.booksToRead}
-          </p>
-          <p>books this year</p>
-        </div>
-
-        <a
-          className="rounded text-white text-center bg-orange-300 w-full py-4"
-          href="/"
-        >
-          View Read Books
-        </a>
+        <div className="bg-orange-700 w-full h-16 flex items-center flex-col"></div>
       </div>
+      <DonutChart
+        booksRead={readBooks.length}
+        readingGoal={profileData.booksToRead ?? 0}
+      />
     </div>
   );
 };

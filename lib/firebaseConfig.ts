@@ -18,4 +18,10 @@ const googleProvider = new GoogleAuthProvider();
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+//   // Only run this code on the client-side
+//   connectFirestoreEmulator(db, "localhost", 8080);
+//   connectStorageEmulator(storage, "localhost", 9199);
+// }
+
 export { auth, googleProvider, db, storage };

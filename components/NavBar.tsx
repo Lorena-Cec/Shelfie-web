@@ -83,9 +83,9 @@ const NavBar = () => {
   }, []);
 
   return (
-    <nav className="flex justify-between items-center px-10 bg-orange-300 text-white">
+    <nav className="flex justify-between items-center px-10 bg-brown-700 text-brown-100">
       <div className="flex items-center">
-        <img src="/logowhite.png" alt="Logo" className="h-8  w-auto" />
+        <img src="/logobrown.png" alt="Logo" className="h-8  w-auto" />
       </div>
       <div className="flex justify-center items-center text-brown-200 rounded-md bg-orange-700 ml-72">
         <select
