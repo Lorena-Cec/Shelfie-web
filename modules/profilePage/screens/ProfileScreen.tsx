@@ -3,48 +3,52 @@ import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import { auth, db } from "@/lib/firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
 import NavBar from "@/components/NavBar";
 import { ProfileData, useFirestore } from "@/modules/profilePage";
 import { Autoplay } from "swiper/modules";
 import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import { onAuthStateChanged } from "firebase/auth";
 
-const Profile: React.FC = () => {
+const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
   const {
     getProfileData,
     updateProfileImage,
-    addFriend,
-    removeFriend,
+    addFollow,
+    unfollowUser,
     sendInfo,
     getReadBooksThisYear,
   } = useFirestore();
+
   const [profileData, setProfileData] = useState<ProfileData>({});
-  const [isFriend, setIsFriend] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [readBooks, setReadBooks] = useState([]);
   const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<any[]>([]);
   const [recentBook, setRecentBook] = useState<any>(null);
   const [favoriteBooks, setFavoriteBooks] = useState<any[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  // Handle authentication state changes and set currentUserId
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserId(user.uid);
+        setCurrentUserId(user.uid);
       } else {
-        setUserId(null);
+        setCurrentUserId(null);
       }
     });
     return () => unsubscribe();
   }, []);
 
+  // Fetch profile data when userId or currentUserId changes
   useEffect(() => {
     if (userId) {
       fetchData();
     }
-  }, [userId]);
+  }, [userId, currentUserId]);
 
+  // Fetch the list of books the user is currently reading
   useEffect(() => {
     const fetchCurrentlyReadingBooks = async () => {
       if (!userId) return;
@@ -73,6 +77,7 @@ const Profile: React.FC = () => {
     fetchCurrentlyReadingBooks();
   }, [userId]);
 
+  // Fetch favorite books (with best rating of 5)
   useEffect(() => {
     const fetchFavoriteBooks = async () => {
       if (!userId) return;
@@ -99,18 +104,36 @@ const Profile: React.FC = () => {
   }, [userId]);
 
   const fetchData = async () => {
-    if (!userId) return;
-    const fetchedReadBooks = await getReadBooksThisYear(userId);
-    setReadBooks(fetchedReadBooks);
-    const fetchMostRecent = await getMostRecentlyReadBook(userId);
-    setRecentBook(fetchMostRecent);
-    const data = await getProfileData(userId);
-    if (data) {
-      setProfileData(data);
-      console.log(profileData);
-      setIsFriend(data.friends?.includes(userId) || false);
+    if (!currentUserId || !userId) return;
+    if (currentUserId == userId) {
+      const fetchedReadBooks = await getReadBooksThisYear(userId);
+      setReadBooks(fetchedReadBooks);
+      const fetchMostRecent = await getMostRecentlyReadBook(userId);
+      setRecentBook(fetchMostRecent);
+
+      const data = await getProfileData(userId);
+      if (data) {
+        setProfileData(data);
+        setIsFollowing(data.following?.includes(currentUserId) || false);
+      }
+    } else {
+      const fetchedReadBooks = await getReadBooksThisYear(userId);
+      setReadBooks(fetchedReadBooks);
+      const fetchMostRecent = await getMostRecentlyReadBook(userId);
+      setRecentBook(fetchMostRecent);
+
+      const data = await getProfileData(userId);
+      if (data) {
+        setProfileData(data);
+      }
+      const dataFollow = await getProfileData(currentUserId);
+      if (dataFollow) {
+        setIsFollowing(dataFollow.following?.includes(userId) || false);
+      }
     }
   };
+
+  console.log(isFollowing);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!userId) return;
@@ -121,14 +144,45 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleFriendClick = async () => {
-    if (!userId) return;
-    if (isFriend) {
-      await removeFriend(userId);
-      setIsFriend(false);
+  const [followingDetails, setFollowingDetails] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFollowingDetails = async () => {
+      const followingPromises = (profileData.following || []).map(
+        async (followingId) => {
+          const followingRef = doc(db, "users", followingId);
+          const followingSnap = await getDoc(followingRef);
+
+          if (followingSnap.exists()) {
+            const followingData = followingSnap.data();
+            return {
+              id: followingId,
+              name: followingData.name || "Unknown",
+              imageUrl: followingData.ProfileInfo?.imageUrl || "",
+            };
+          }
+          return null;
+        }
+      );
+
+      const followingData = await Promise.all(followingPromises);
+      setFollowingDetails(followingData.filter(Boolean));
+    };
+
+    if (profileData?.following?.length) {
+      fetchFollowingDetails();
+    }
+  }, [profileData?.following]);
+
+  const handleFollowClick = async () => {
+    if (!currentUserId || !userId) return;
+
+    if (isFollowing) {
+      await unfollowUser(currentUserId, userId);
+      setIsFollowing(false);
     } else {
-      await addFriend(userId);
-      setIsFriend(true);
+      await addFollow(currentUserId, userId);
+      setIsFollowing(true);
     }
   };
 
@@ -167,8 +221,6 @@ const Profile: React.FC = () => {
     pagesRead: number,
     totalPages: number
   ) => {
-    console.log(pagesRead);
-    console.log(totalPages);
     if (totalPages === 0 || pagesRead === 0) return 100;
     return Math.max(0, ((totalPages - pagesRead) / totalPages) * 100);
   };
@@ -203,46 +255,69 @@ const Profile: React.FC = () => {
             )}
           </div>
 
-          {/* Friend Button */}
-          <button
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg mb-4"
-            onClick={handleFriendClick}
-          >
-            {isFriend ? "Friends" : "Add Friend"}
-          </button>
-
-          {/* Dropdown for "Friends" */}
-          {isFriend && (
-            <div className="relative">
+          <div className="flex justify-center mt-4">
+            {userId === auth.currentUser?.uid ? (
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="text-gray-500"
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg"
+                onClick={() =>
+                  navigator.clipboard.writeText(window.location.href)
+                }
               >
-                Friends ▼
+                Share Profile
               </button>
-              {isDropdownOpen && (
-                <div className="absolute bg-white shadow-md p-2 rounded">
-                  <button onClick={handleFriendClick} className="text-red-500">
-                    Remove Friend
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+            ) : isFollowing ? (
+              // Dropdown for "Following" when already following
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="px-4 py-2 bg-orange-500 text-white rounded-lg"
+                >
+                  Following ▼
+                </button>
+                {isDropdownOpen && (
+                  <div className="absolute w-full text-center bg-white shadow-md p-2 rounded mt-2">
+                    <button
+                      onClick={handleFollowClick}
+                      className="text-red-500"
+                    >
+                      Unfollow
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg"
+                onClick={handleFollowClick}
+              >
+                Follow
+              </button>
+            )}
+          </div>
 
-          {/* Friends List */}
-          <h2 className="font-bold text-xl mt-8">Friends</h2>
-          {profileData.friends && profileData.friends.length > 0 ? (
-            <ul>
-              {profileData.friends.map((friend, index) => (
-                <li key={index} className="text-gray-700">
-                  {friend}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500">Find friends</p>
-          )}
+          <div>
+            <h2 className="font-bold text-xl mt-8 mb-4">Following</h2>
+            {followingDetails.length > 0 ? (
+              <ul>
+                {followingDetails.map((following) => (
+                  <a
+                    href={`/profile/${following.id}`}
+                    key={following.id}
+                    className="text-gray-700 flex items-center space-x-3 p-2"
+                  >
+                    <img
+                      src={following.imageUrl || "/user.jpg"}
+                      alt={following.name}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span>{following.name}</span>
+                  </a>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">Find following</p>
+            )}
+          </div>
         </div>
 
         {/* CENTER CONTENT */}
@@ -409,4 +484,4 @@ const Profile: React.FC = () => {
   );
 };
 
-export default Profile;
+export default ProfileScreen;

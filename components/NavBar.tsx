@@ -6,6 +6,7 @@ import { setUser } from "@/modules/authenticaton/state/authSlice";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { FaRegUserCircle, FaSearch } from "react-icons/fa";
+import { onAuthStateChanged } from "firebase/auth";
 
 const NavBar = () => {
   const dispatch = useDispatch();
@@ -15,6 +16,18 @@ const NavBar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLUListElement | null>(null);
   const [dropdownOpenProfile, setDropdownOpenProfile] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const genres = [
     { name: "Fiction", subject: "fiction" },
@@ -27,7 +40,7 @@ const NavBar = () => {
   ];
 
   const options = [
-    { name: "Profile", link: "/profile" },
+    { name: "Profile", link: `/profile/${userId}` },
     { name: "Reading Challenge", link: "/challenge" },
     { name: "Quotes", link: "/quotes" },
     { name: "Logout", link: "/" },

@@ -14,7 +14,9 @@ export const useFirestore = () => {
     if (docSnap.exists()) {
       const data = docSnap.data();
 
-      const profileInfo = data.ProfileInfo || {};
+      const profileInfo = data.ProfileInfo || {}; // Podaci unutar ProfileInfo
+      const followers = data.followers || []; // Direktno iz dokumenta korisnika, izvan ProfileInfo
+      const following = data.following || [];
 
       return {
         imageUrl: profileInfo.imageUrl || "",
@@ -26,11 +28,12 @@ export const useFirestore = () => {
         booksToRead: profileInfo.booksToRead || 0,
         goals: profileInfo.goals || "",
         genres: profileInfo.genres || "",
-        friends: profileInfo.friends || [],
         favoriteBooks: profileInfo.favoriteBooks || [],
         recentUpdates: profileInfo.recentUpdates || [],
         currentlyReading: profileInfo.currentlyReading || [],
         recentlyRead: profileInfo.recentlyRead || [],
+        followers: followers, // Dodajemo following izvan ProfileInfo
+        following: following,
       };
     }
 
@@ -43,22 +46,52 @@ export const useFirestore = () => {
     return await getDownloadURL(storageRef);
   };
 
-  const addFriend = async (userId: string) => {
-    const userRef = doc(db, "users", userId);
-    const data = await getProfileData(userId);
-    if (data && data.friends) {
-      await updateDoc(userRef, { friends: [...data.friends, userId] });
-    } else {
-      await updateDoc(userRef, { friends: [userId] });
+  const addFollow = async (currentUserId: string, otherUserId: string) => {
+    const currentUserRef = doc(db, "users", currentUserId);
+    const otherUserRef = doc(db, "users", otherUserId);
+
+    const currentUserData = await getProfileData(currentUserId);
+    const otherUserData = await getProfileData(otherUserId);
+
+    if (
+      currentUserData &&
+      currentUserData.following &&
+      !currentUserData.following.includes(otherUserId)
+    ) {
+      await updateDoc(currentUserRef, {
+        following: [...currentUserData.following, otherUserId],
+      });
+    }
+
+    if (
+      otherUserData &&
+      otherUserData.followers &&
+      !otherUserData.followers.includes(currentUserId)
+    ) {
+      await updateDoc(otherUserRef, {
+        followers: [...otherUserData.followers, currentUserId],
+      });
     }
   };
 
-  const removeFriend = async (userId: string) => {
-    const userRef = doc(db, "users", userId);
-    const data = await getProfileData(userId);
-    if (data && data.friends) {
-      await updateDoc(userRef, {
-        friends: data.friends.filter((id: string) => id !== userId),
+  const unfollowUser = async (currentUserId: string, otherUserId: string) => {
+    const currentUserRef = doc(db, "users", currentUserId);
+    const otherUserRef = doc(db, "users", otherUserId);
+
+    const currentUserData = await getProfileData(currentUserId);
+    const otherUserData = await getProfileData(otherUserId);
+
+    // Uklanjanje iz 'following' liste trenutnog korisnika
+    if (currentUserData && currentUserData.following) {
+      await updateDoc(currentUserRef, {
+        following: currentUserData.following.filter((id) => id !== otherUserId),
+      });
+    }
+
+    // Uklanjanje iz 'followers' liste drugog korisnika
+    if (otherUserData && otherUserData.followers) {
+      await updateDoc(otherUserRef, {
+        followers: otherUserData.followers.filter((id) => id !== currentUserId),
       });
     }
   };
@@ -108,8 +141,8 @@ export const useFirestore = () => {
   return {
     getProfileData,
     updateProfileImage,
-    addFriend,
-    removeFriend,
+    addFollow,
+    unfollowUser,
     sendInfo,
     getReadBooksThisYear,
   };

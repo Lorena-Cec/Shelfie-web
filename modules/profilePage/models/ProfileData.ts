@@ -8,7 +8,8 @@ export interface ProfileData {
   booksToRead?: number;
   goals?: string[];
   genres?: string[];
-  friends?: string[];
+  followers?: string[];
+  following?: string[];
   favoriteBooks?: Book[];
   recentUpdates?: Update[];
   currentlyReading?: Book[];
