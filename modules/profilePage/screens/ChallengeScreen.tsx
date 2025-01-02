@@ -71,13 +71,123 @@ const ChallengeScreen: React.FC = () => {
         </div>
         <div className="bg-orange-700 w-full h-16 flex items-center flex-col"></div>
       </div>
-      <div className="flex">
+      <div className="flex my-8">
         <DonutChart
           booksRead={readBooks.length}
           readingGoal={profileData.booksToRead ?? 0}
         />
         <PagesChart pagesRead={pagesRead} />
         <RatingPieChart readBooks={readBooks} />
+      </div>
+      <p className="text-center my-28 text-5xl font-bold">Your books</p>
+      <div className="flex flex-wrap gap-14 items-center justify-center px-32">
+        {readBooks.map((book: any, index: number) => (
+          <div key={index} className="flex flex-col items-center">
+            {book.image ? (
+              <a href={`/googleBooks/${book.id}`}>
+                <img
+                  src={book.image}
+                  alt={book.title || "Cover"}
+                  className="w-48 h-72 object-cover shadow-3xl"
+                />
+              </a>
+            ) : (
+              <div className="w-32 h-48 items-center flex justify-center bg-gray-300 text-gray-700 rounded-lg shadow-lg">
+                No Cover
+              </div>
+            )}
+            <div className="flex space-x-px mt-7">
+              {Array.from({ length: 5 }, (_, index) => (
+                <img
+                  key={index}
+                  src={`/stars${index < book.rating ? index + 1 : 0}.png`}
+                  alt={`${index + 1} star`}
+                  className="w-9 h-9"
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-center gap-36 pb-32 mt-28">
+        <div>
+          <p className="text-center my-16 text-4xl font-bold">
+            Your longest book
+          </p>
+          <div>
+            {(() => {
+              const bookWithMostPages = readBooks.reduce(
+                (maxBook: any, book: any) => {
+                  return book.pagesTotal > (maxBook?.pagesTotal || 0)
+                    ? book
+                    : maxBook;
+                },
+                null
+              );
+
+              return bookWithMostPages ? (
+                <div className="flex items-center justify-center gap-14">
+                  {bookWithMostPages.image ? (
+                    <img
+                      src={bookWithMostPages.image}
+                      alt={bookWithMostPages.title || "Cover"}
+                      className="w-48 h-64 object-cover shadow-3xl"
+                    />
+                  ) : (
+                    <div className="w-32 h-48 flex items-center justify-center bg-gray-300 text-gray-700 rounded-lg shadow-lg">
+                      No Cover
+                    </div>
+                  )}
+                  <p className="text-3xl">
+                    {bookWithMostPages.pagesTotal} pages
+                  </p>
+                </div>
+              ) : (
+                <p className="text-center text-gray-500">No books available</p>
+              );
+            })()}
+          </div>
+        </div>
+
+        <p className="text-5xl font-bold mt-44">VS</p>
+
+        <div>
+          <p className="text-center my-16 text-4xl font-bold">
+            Your shortest book
+          </p>
+          <div>
+            {(() => {
+              const bookWithLeastPages = readBooks.reduce(
+                (minBook: any, book: any) => {
+                  return book.pagesTotal < (minBook?.pagesTotal || Infinity)
+                    ? book
+                    : minBook;
+                },
+                null
+              );
+              return bookWithLeastPages ? (
+                <div className="flex items-center justify-center gap-14">
+                  {bookWithLeastPages.image ? (
+                    <img
+                      src={bookWithLeastPages.image}
+                      alt={bookWithLeastPages.title || "Cover"}
+                      className="w-48 h-64 object-cover shadow-3xl"
+                    />
+                  ) : (
+                    <div className="w-32 h-48 flex items-center justify-center bg-gray-300 text-gray-700 rounded-lg shadow-lg">
+                      No Cover
+                    </div>
+                  )}
+                  <p className="text-3xl">
+                    {bookWithLeastPages.pagesTotal} pages
+                  </p>
+                </div>
+              ) : (
+                <p className="text-center text-gray-500">No books available</p>
+              );
+            })()}
+          </div>
+        </div>
       </div>
     </div>
   );

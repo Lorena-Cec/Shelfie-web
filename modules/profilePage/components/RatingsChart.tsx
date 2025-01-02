@@ -10,18 +10,16 @@ interface ChallengeScreenProps {
 }
 
 const RatingPieChart: React.FC<ChallengeScreenProps> = ({ readBooks }) => {
-  // Broj knjiga za svaku ocenu
   const [ratingData, setRatingData] = useState([0, 0, 0, 0, 0, 0]);
 
   useEffect(() => {
-    // Funkcija za računanje distribucije ocjena
-    const ratingsCount = [0, 0, 0, 0, 0, 0]; // Za 0, 1, 2, 3, 4, 5 ocjena
+    const ratingsCount = [0, 0, 0, 0, 0, 0];
     readBooks.forEach((book) => {
-      const rating = book.rating; // Pretpostavljamo da je rating broj između 0 i 5
+      const rating = book.rating;
       if (rating === undefined) {
-        ratingsCount[0] += 1; // Ako nema ratinga, ide u 0
+        ratingsCount[0] += 1;
       } else {
-        ratingsCount[rating] += 1; // Ako ima rating, inkrementiraj odgovarajući broj
+        ratingsCount[rating] += 1;
       }
     });
 
@@ -33,14 +31,14 @@ const RatingPieChart: React.FC<ChallengeScreenProps> = ({ readBooks }) => {
     datasets: [
       {
         label: "Book Ratings",
-        data: ratingData, // Ovo je niz sa brojem knjiga po ratingu
+        data: ratingData,
         backgroundColor: [
-          "#D3D3D3",
-          "#FFCC00",
-          "#FF8000",
-          "#FF4C00",
-          "#D32F2F",
-          "#C2185B",
+          "#72260Bff",
+          "#A14524ff",
+          "#D46536ff",
+          "#DF8739ff",
+          "#E9A73Bff",
+          "#FFCA72ff",
         ],
         borderWidth: 1,
       },
@@ -51,17 +49,18 @@ const RatingPieChart: React.FC<ChallengeScreenProps> = ({ readBooks }) => {
     responsive: true,
     plugins: {
       legend: {
-        position: "top" as const,
+        display: false,
       },
       tooltip: {
         enabled: true,
       },
     },
-    cutout: "70%",
+    cutout: "0%",
   };
 
   return (
-    <div className="w-1/4 mx-auto">
+    <div className="w-1/5 mx-auto text-center">
+      <p className="text-2xl font-bold py-10">Ratings:</p>
       <Doughnut data={data} options={options} />
     </div>
   );
