@@ -6,7 +6,7 @@ import { auth, db } from "@/lib/firebaseConfig";
 import NavBar from "@/components/NavBar";
 import { ProfileData, useFirestore } from "@/modules/profilePage";
 import { Autoplay } from "swiper/modules";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -28,6 +28,8 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
   const [recentBook, setRecentBook] = useState<any>(null);
   const [favoriteBooks, setFavoriteBooks] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isFollowingDropdownOpen, setIsFollowingDropdownOpen] = useState(false);
+  const [recentUpdates, setRecentUpdates] = useState<any[]>([]);
 
   // Handle authentication state changes and set currentUserId
   useEffect(() => {
@@ -110,6 +112,8 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
       setReadBooks(fetchedReadBooks);
       const fetchMostRecent = await getMostRecentlyReadBook(userId);
       setRecentBook(fetchMostRecent);
+      const fetchRecentUpdates = await getMostRecentUpdates(userId);
+      setRecentUpdates(fetchRecentUpdates);
 
       const data = await getProfileData(userId);
       if (data) {
@@ -186,6 +190,12 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
     }
   };
 
+  const handleUnfollow = async (id: string) => {
+    if (!currentUserId) return;
+    await unfollowUser(currentUserId, id);
+    fetchData(); // Refresh the following list
+  };
+
   const getMostRecentlyReadBook = async (userId: string) => {
     const shelvesRef = doc(db, "users", userId, "shelves", "Read");
     const docSnap = await getDoc(shelvesRef);
@@ -215,6 +225,68 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
     });
 
     return booksWithReadDate[0];
+  };
+
+  const getMostRecentUpdates = async (userId: string) => {
+    const shelvesRef = collection(db, "users", userId, "shelves");
+    const querySnapshot = await getDocs(shelvesRef);
+
+    if (querySnapshot.empty) {
+      console.log("No shelves found.");
+      return [];
+    }
+
+    let recentUpdates: {
+      id: string;
+      title: string;
+      type: string;
+      timestamp: string;
+      rating?: number;
+      image?: string;
+      authors?: string[];
+      shelfName: string;
+    }[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const books = data.books || [];
+      const shelfName = doc.id;
+
+      books.forEach((book: any) => {
+        if (book.recentAdd) {
+          recentUpdates.push({
+            id: book.id,
+            title: book.title,
+            type: "Added",
+            timestamp: book.recentAdd,
+            rating: book.rating || 0,
+            image: book.image || "",
+            authors: book.authors || [],
+            shelfName,
+          });
+        }
+
+        if (book.recentRating) {
+          recentUpdates.push({
+            id: book.id,
+            title: book.title,
+            type: "Rated",
+            timestamp: book.recentRating,
+            rating: book.rating || 0,
+            image: book.image || "",
+            authors: book.authors || [],
+            shelfName,
+          });
+        }
+      });
+    });
+
+    recentUpdates.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    return recentUpdates.slice(0, 10);
   };
 
   const calculateRemainingPercentage = (
@@ -266,7 +338,6 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
                 Share Profile
               </button>
             ) : isFollowing ? (
-              // Dropdown for "Following" when already following
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -275,7 +346,7 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
                   Following ▼
                 </button>
                 {isDropdownOpen && (
-                  <div className="absolute w-full text-center bg-white shadow-md p-2 rounded mt-2">
+                  <div className="absolute w-full text-center bg-white shadow-md p-2 rounded">
                     <button
                       onClick={handleFollowClick}
                       className="text-red-500"
@@ -296,22 +367,48 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
 
           <div>
-            <h2 className="font-bold text-xl mt-8 mb-4">Following</h2>
+            <h2 className="font-extrabold text-xl mt-8 mb-4 text-center">
+              Following
+            </h2>
             {followingDetails.length > 0 ? (
               <ul>
                 {followingDetails.map((following) => (
-                  <a
-                    href={`/profile/${following.id}`}
+                  <div
                     key={following.id}
-                    className="text-gray-700 flex items-center space-x-3 p-2"
+                    className="text-gray-700 flex items-center space-x-3 p-2 relative"
                   >
                     <img
                       src={following.imageUrl || "/user.jpg"}
                       alt={following.name}
                       className="w-8 h-8 rounded-full"
                     />
-                    <span>{following.name}</span>
-                  </a>
+                    <button
+                      onClick={() =>
+                        setIsFollowingDropdownOpen((prev) =>
+                          prev === following.id ? null : following.id
+                        )
+                      }
+                      className="text-lg text-brown-100 font-medium"
+                    >
+                      {following.name}
+                    </button>
+                    {isFollowingDropdownOpen === following.id && (
+                      <div className="absolute left-0 top-10 mt-1 z-10 w-full bg-white shadow-md rounded text-center">
+                        <button
+                          onClick={() => handleUnfollow(following.id)}
+                          className="w-full py-2 font-medium text-red-500 hover:bg-orange-300 hover:text-white rounded-t"
+                        >
+                          Unfollow
+                        </button>
+                        <a
+                          href={`/profile/${following.id}`}
+                          className="block w-full py-2 font-medium text-brown-100 hover:bg-orange-300 hover:text-white rounded-b"
+                        >
+                          View Profile
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </ul>
             ) : (
@@ -360,12 +457,52 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
           <h3 className="font-semibold text-lg mt-10">Recent Updates</h3>
           <hr className="w-full h-1 bg-brown-100 mb-5"></hr>
           <ul>
-            {profileData.recentUpdates?.slice(0, 5).map((update, index) => (
-              <li key={index} className="text-gray-700">
-                {update.title} - {update.action} on{" "}
-                {new Date(update.timestamp).toLocaleDateString()}
-              </li>
-            )) || <p>No recent updates.</p>}
+            {recentUpdates?.slice(0, 5).length > 0 ? (
+              recentUpdates.slice(0, 5).map((update, index) => (
+                <li key={index} className="flex items-start space-x-4 mb-4">
+                  <img
+                    src={update.image || "/default-cover.jpg"}
+                    alt={`${update.title} cover`}
+                    className="w-16 h-24 object-cover rounded"
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      {update.title}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      by {update.authors?.join(", ") || "Unknown Author"}
+                    </p>
+                    {update.type === "Added" && (
+                      <p className="text-gray-700 text-sm">
+                        Book was added to shelf{" "}
+                        <span className="font-medium">{update.shelfName}</span>.
+                      </p>
+                    )}
+                    {update.type === "Rated" && (
+                      <div className="text-gray-700 text-sm flex">
+                        <p>Book was rated&nbsp;</p>
+                        <div className="flex space-x-px">
+                          {Array.from({ length: 5 }, (_, index) => (
+                            <img
+                              key={index}
+                              src={`/stars${index < update.rating ? index + 1 : 0}.png`}
+                              alt={`${index + 1} star`}
+                              className="w-5 h-5"
+                            />
+                          ))}
+                        </div>
+                        <p>&nbsp;{update.rating === 1 ? "star" : "stars"}.</p>
+                      </div>
+                    )}
+                    <p className="text-gray-500 text-xs">
+                      Update on: {new Date(update.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <p className="text-gray-500">No recent updates.</p>
+            )}
           </ul>
         </div>
 

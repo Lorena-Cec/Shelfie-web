@@ -74,6 +74,8 @@ const useShelfFunctions = () => {
         rereadDates: null,
         quotes: "",
         uploadedDocument: "",
+        recentAdd: new Date().toISOString(),
+        recentRating: 0,
       };
 
       const shelfRef = doc(db, "users", userId, "shelves", shelf);

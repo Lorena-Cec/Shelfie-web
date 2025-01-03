@@ -124,6 +124,12 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
   };
 
   const handleSave = () => {
+    let recentRating = null;
+
+    if (rating != book.rating) {
+      recentRating = new Date().toISOString();
+    }
+
     const updates = {
       rating: rating,
       review: reviewText,
@@ -133,6 +139,7 @@ const BookActions: React.FC<BookActionsProps> = ({ book }) => {
       rereadDates: rereadDates,
       pagesRead: newPagesRead,
       pagesTotal: newPagesTotal,
+      recentRating: recentRating,
     };
 
     if (newPagesRead > newPagesTotal && newPagesTotal > 0) {

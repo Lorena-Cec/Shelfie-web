@@ -13,4 +13,6 @@ export interface Book {
   quotes: string[];
   review: string;
   uploadedDocument: string;
+  recentAdd: string;
+  recentRating: string;
 }
