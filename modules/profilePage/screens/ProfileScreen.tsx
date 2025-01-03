@@ -31,7 +31,6 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
   const [isFollowingDropdownOpen, setIsFollowingDropdownOpen] = useState(false);
   const [recentUpdates, setRecentUpdates] = useState<any[]>([]);
 
-  // Handle authentication state changes and set currentUserId
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -43,14 +42,12 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch profile data when userId or currentUserId changes
   useEffect(() => {
     if (userId) {
       fetchData();
     }
   }, [userId, currentUserId]);
 
-  // Fetch the list of books the user is currently reading
   useEffect(() => {
     const fetchCurrentlyReadingBooks = async () => {
       if (!userId) return;
@@ -79,7 +76,6 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
     fetchCurrentlyReadingBooks();
   }, [userId]);
 
-  // Fetch favorite books (with best rating of 5)
   useEffect(() => {
     const fetchFavoriteBooks = async () => {
       if (!userId) return;
@@ -107,25 +103,20 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
 
   const fetchData = async () => {
     if (!currentUserId || !userId) return;
-    if (currentUserId == userId) {
-      const fetchedReadBooks = await getReadBooksThisYear(userId);
-      setReadBooks(fetchedReadBooks);
-      const fetchMostRecent = await getMostRecentlyReadBook(userId);
-      setRecentBook(fetchMostRecent);
-      const fetchRecentUpdates = await getMostRecentUpdates(userId);
-      setRecentUpdates(fetchRecentUpdates);
+    const fetchedReadBooks = await getReadBooksThisYear(userId);
+    setReadBooks(fetchedReadBooks);
+    const fetchMostRecent = await getMostRecentlyReadBook(userId);
+    setRecentBook(fetchMostRecent);
+    const fetchRecentUpdates = await getMostRecentUpdates(userId);
+    setRecentUpdates(fetchRecentUpdates);
 
+    if (currentUserId == userId) {
       const data = await getProfileData(userId);
       if (data) {
         setProfileData(data);
         setIsFollowing(data.following?.includes(currentUserId) || false);
       }
     } else {
-      const fetchedReadBooks = await getReadBooksThisYear(userId);
-      setReadBooks(fetchedReadBooks);
-      const fetchMostRecent = await getMostRecentlyReadBook(userId);
-      setRecentBook(fetchMostRecent);
-
       const data = await getProfileData(userId);
       if (data) {
         setProfileData(data);
@@ -147,6 +138,36 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
       await sendInfo(imageUrl);
     }
   };
+
+  const [followersDetails, setFollowersDetails] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFollowersDetails = async () => {
+      const followersPromises = (profileData.followers || []).map(
+        async (followerId) => {
+          const followerRef = doc(db, "users", followerId);
+          const followerSnap = await getDoc(followerRef);
+
+          if (followerSnap.exists()) {
+            const followerData = followerSnap.data();
+            return {
+              id: followerId,
+              name: followerData.name || "Unknown",
+              imageUrl: followerData.ProfileInfo?.imageUrl || "",
+            };
+          }
+          return null;
+        }
+      );
+
+      const followersData = await Promise.all(followersPromises);
+      setFollowersDetails(followersData.filter(Boolean)); // Filtriraj null vrijednosti
+    };
+
+    if (profileData?.followers?.length) {
+      fetchFollowersDetails();
+    }
+  }, [profileData?.followers]); // Ovdje promjena prati "followers"
 
   const [followingDetails, setFollowingDetails] = useState<any[]>([]);
 
@@ -412,7 +433,34 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500">Find following</p>
+              <p className="text-gray-500">You are not following anyone.</p>
+            )}
+          </div>
+          <div>
+            <h2 className="font-extrabold text-xl mt-8 mb-4 text-center">
+              Followers
+            </h2>
+            {followersDetails.length > 0 ? (
+              <ul>
+                {followersDetails.map((follower) => (
+                  <a
+                    href={`/profile/${follower.id}`}
+                    key={follower.id}
+                    className="text-gray-700 flex items-center space-x-3 p-2 relative"
+                  >
+                    <img
+                      src={follower.imageUrl || "/user.jpg"}
+                      alt={follower.name}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <p className="text-lg text-brown-100 font-medium">
+                      {follower.name}
+                    </p>
+                  </a>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No followers yet.</p>
             )}
           </div>
         </div>

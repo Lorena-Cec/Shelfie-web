@@ -81,14 +81,12 @@ export const useFirestore = () => {
     const currentUserData = await getProfileData(currentUserId);
     const otherUserData = await getProfileData(otherUserId);
 
-    // Uklanjanje iz 'following' liste trenutnog korisnika
     if (currentUserData && currentUserData.following) {
       await updateDoc(currentUserRef, {
         following: currentUserData.following.filter((id) => id !== otherUserId),
       });
     }
 
-    // Uklanjanje iz 'followers' liste drugog korisnika
     if (otherUserData && otherUserData.followers) {
       await updateDoc(otherUserRef, {
         followers: otherUserData.followers.filter((id) => id !== currentUserId),
