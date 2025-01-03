@@ -132,7 +132,9 @@ const NavBar = () => {
           </Link>
         </li>
         <li className="hover:bg-orange-200 px-5 py-4">
-          <p>Feed</p>
+          <Link href="/feed" className="hover:text-white">
+            Feed
+          </Link>
         </li>
         <li className="hover:bg-orange-200 px-5 py-4">
           <Link href="/shelves/Read" className="hover:text-white">
