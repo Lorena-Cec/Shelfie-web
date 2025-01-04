@@ -7,11 +7,13 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
 const FeedScreen = () => {
-  const { getProfileData } = useFirestore();
+  const { getProfileData, unfollowUser } = useFirestore();
 
   const [feedUpdates, setFeedUpdates] = useState<any[]>([]);
   const [profileData, setProfileData] = useState<ProfileData>({});
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isFollowingDropdownOpen, setIsFollowingDropdownOpen] = useState(false);
+  const [, setIsFollowing] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -139,6 +141,16 @@ const FeedScreen = () => {
     }
   };
 
+  const handleUnfollow = async (id: string) => {
+    if (!currentUserId) return;
+    await unfollowUser(currentUserId, id);
+    const data = await getProfileData(currentUserId);
+    if (data) {
+      setProfileData(data);
+      setIsFollowing(data.following?.includes(currentUserId) || false);
+    }
+  };
+
   useEffect(() => {
     if (profileData?.following?.length) {
       fetchFeedUpdates();
@@ -178,13 +190,62 @@ const FeedScreen = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <NavBar />
-      <div className="flex flex-col flex-1 bg-brown-700 pb-20 px-96">
-        <div>
-          <h2 className="font-extrabold text-xl mt-8 mb-4 text-center text-white">
-            Feed
-          </h2>
+      <div className="flex bg-brown-700 p-20">
+        <div className="flex gap-44 justify-center">
+          <div className="flex flex-col items-center w-1/4">
+            <div>
+              <h2 className="font-extrabold text-2xl mt-8 mb-4 text-center text-brown-100">
+                Following
+              </h2>
+              {followingDetails.length > 0 ? (
+                <ul>
+                  {followingDetails.map((following) => (
+                    <div
+                      key={following.id}
+                      className="text-gray-700 flex items-center space-x-3 p-2 relative"
+                    >
+                      <img
+                        src={following.imageUrl || "/user.jpg"}
+                        alt={following.name}
+                        className="w-8 h-8 rounded-full object-cover absolute top-0 -left-10"
+                      />
+                      <button
+                        onClick={() =>
+                          setIsFollowingDropdownOpen((prev) =>
+                            prev === following.id ? null : following.id
+                          )
+                        }
+                        className="text-lg text-brown-100 font-medium"
+                      >
+                        {following.name}
+                      </button>
+                      {isFollowingDropdownOpen === following.id && (
+                        <div className="absolute left-0 top-10 mt-1 z-10 w-full bg-white shadow-md rounded text-center">
+                          <button
+                            onClick={() => handleUnfollow(following.id)}
+                            className="w-full py-2 font-medium text-red-500 hover:bg-orange-300 hover:text-white rounded-t"
+                          >
+                            Unfollow
+                          </button>
+                          <a
+                            href={`/profile/${following.id}`}
+                            className="block w-full py-2 font-medium text-brown-100 hover:bg-orange-300 hover:text-white rounded-b"
+                          >
+                            View Profile
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">You are not following anyone.</p>
+              )}
+            </div>
+          </div>
+
           {feedUpdates.length > 0 ? (
-            <ul>
+            <ul className="w-2/3">
               {feedUpdates.map((update, index) => {
                 const following = followingDetails.find(
                   (f) => f.id === update.authorId
@@ -197,7 +258,7 @@ const FeedScreen = () => {
                   >
                     {/* Profilna slika following osobe */}
                     <img
-                      src={following?.imageUrl || "/default-profile-image.jpg"}
+                      src={following.imageUrl || "/user.jpg"}
                       alt={`${following?.name} profile`}
                       className="w-12 h-12 rounded-full object-cover absolute top-0 -left-10"
                     />
