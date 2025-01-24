@@ -136,6 +136,45 @@ export const useFirestore = () => {
     return readBooksThisYear;
   };
 
+  const getQuotes = async (userId: string) => {
+    try {
+      const shelves = ["Read", "Currently Reading", "Want to Read"];
+      const quotes: { bookTitle: string; quote: string }[] = [];
+
+      for (const shelf of shelves) {
+        const shelfDocRef = doc(db, "users", userId, "shelves", shelf);
+        const shelfDoc = await getDoc(shelfDocRef);
+
+        if (!shelfDoc.exists()) {
+          console.log(`Shelf '${shelf}' does not exist.`);
+          continue;
+        }
+
+        const shelfData = shelfDoc.data();
+        console.log(`Shelf data for '${shelf}':`, shelfData);
+
+        if (shelfData.books && Array.isArray(shelfData.books)) {
+          shelfData.books.forEach((book: any) => {
+            if (book.quotes && Array.isArray(book.quotes)) {
+              book.quotes.forEach((quote: string) => {
+                quotes.push({
+                  bookTitle: book.title || "Unknown Title",
+                  quote,
+                });
+              });
+            }
+          });
+        } else {
+          console.log(`No books found in shelf: ${shelf}`);
+        }
+      }
+      return quotes;
+    } catch (error) {
+      console.error("Error fetching quotes:", error);
+      return [];
+    }
+  };
+
   return {
     getProfileData,
     updateProfileImage,
@@ -143,5 +182,6 @@ export const useFirestore = () => {
     unfollowUser,
     sendInfo,
     getReadBooksThisYear,
+    getQuotes,
   };
 };
