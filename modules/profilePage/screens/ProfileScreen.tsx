@@ -9,6 +9,8 @@ import { Autoplay } from "swiper/modules";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
+import { getBooksToReadForYear } from "../hooks/setReadingGoal";
+import { GoalPopup } from "../components/GoalPopup";
 
 const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
   const {
@@ -30,6 +32,7 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isFollowingDropdownOpen, setIsFollowingDropdownOpen] = useState(false);
   const [recentUpdates, setRecentUpdates] = useState<any[]>([]);
+  const currentYear = new Date().getFullYear().toString();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -127,6 +130,20 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
       }
     }
   };
+
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    const checkGoal = async () => {
+      const goal = await getBooksToReadForYear(userId, currentYear);
+
+      if (!goal) {
+        setShowPopup(true);
+      }
+    };
+
+    checkGoal();
+  }, [userId]);
 
   console.log(isFollowing);
 
@@ -321,6 +338,9 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
   return (
     <div className="min-h-screen bg-orange-700 text-brown-100">
       <NavBar></NavBar>
+      {showPopup && (
+        <GoalPopup userId={userId} onClose={() => setShowPopup(false)} />
+      )}
       <div className="flex mt-20">
         {/* LEFT SIDE */}
         <div className="flex flex-col items-center w-1/4 pl-48">
@@ -568,7 +588,10 @@ const ProfileScreen: React.FC<{ userId: string }> = ({ userId }) => {
               <p>{profileData.name} has read</p>
               <p className="text-5xl font-bold">
                 {" "}
-                {readBooks.length} / {profileData.booksToRead}
+                {readBooks.length} /{" "}
+                {profileData.booksToRead?.[
+                  new Date().getFullYear().toString()
+                ] || 0}
               </p>
               <p>books this year</p>
             </div>

@@ -14,8 +14,8 @@ export const useFirestore = () => {
     if (docSnap.exists()) {
       const data = docSnap.data();
 
-      const profileInfo = data.ProfileInfo || {}; // Podaci unutar ProfileInfo
-      const followers = data.followers || []; // Direktno iz dokumenta korisnika, izvan ProfileInfo
+      const profileInfo = data.ProfileInfo || {};
+      const followers = data.followers || [];
       const following = data.following || [];
 
       return {
@@ -25,14 +25,14 @@ export const useFirestore = () => {
         country: profileInfo.country || "",
         aboutMe: profileInfo.aboutMe || "",
         hobbies: profileInfo.hobbies || [],
-        booksToRead: profileInfo.booksToRead || 0,
+        booksToRead: profileInfo.booksToRead || {},
         goals: profileInfo.goals || "",
         genres: profileInfo.genres || "",
         favoriteBooks: profileInfo.favoriteBooks || [],
         recentUpdates: profileInfo.recentUpdates || [],
         currentlyReading: profileInfo.currentlyReading || [],
         recentlyRead: profileInfo.recentlyRead || [],
-        followers: followers, // Dodajemo following izvan ProfileInfo
+        followers: followers,
         following: following,
       };
     }

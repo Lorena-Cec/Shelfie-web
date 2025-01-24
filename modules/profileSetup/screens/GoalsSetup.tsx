@@ -44,13 +44,17 @@ const GoalsSetup: React.FC = () => {
         ? [...goals.filter((h) => h !== "Other"), otherGoal]
         : goals;
 
+    const currentYear = new Date().getFullYear().toString(); // Dohvati tekuću godinu
+
     try {
       await setDoc(
         doc(db, "users", user.uid),
         {
           ProfileInfo: {
             goals: finalGoals,
-            booksToRead: booksToRead,
+            booksToRead: {
+              [currentYear]: booksToRead, // Postavi cilj za trenutnu godinu
+            },
           },
         },
         { merge: true }

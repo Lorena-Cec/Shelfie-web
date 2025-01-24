@@ -74,7 +74,11 @@ const ChallengeScreen: React.FC = () => {
       <div className="flex my-8">
         <DonutChart
           booksRead={readBooks.length}
-          readingGoal={profileData.booksToRead ?? 0}
+          readingGoal={
+            (profileData.booksToRead?.[new Date().getFullYear().toString()] ||
+              0) ??
+            0
+          }
         />
         <PagesChart pagesRead={pagesRead} />
         <RatingPieChart readBooks={readBooks} />

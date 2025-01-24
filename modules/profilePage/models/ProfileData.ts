@@ -5,7 +5,7 @@ export interface ProfileData {
   country?: string;
   aboutMe?: string;
   hobbies?: string[];
-  booksToRead?: number;
+  booksToRead?: Record<string, number>;
   goals?: string[];
   genres?: string[];
   followers?: string[];
